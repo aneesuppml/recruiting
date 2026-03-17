@@ -1,0 +1,468 @@
+{
+  "info": {
+    "name": "Recruiting AI API",
+    "description": "Rails API for recruiting platform - Auth, Companies, Jobs, Candidates, Applications, Interviews, Feedback, Dashboard",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:3000" },
+    { "key": "token", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"email\": \"user@example.com\",\n    \"password\": \"secret123\",\n    \"password_confirmation\": \"secret123\"\n  }\n}"
+            },
+            "url": "{{base_url}}/signup"
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"email\": \"user@example.com\",\n    \"password\": \"secret123\"\n  }\n}"
+            },
+            "url": "{{base_url}}/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Companies",
+      "item": [
+        {
+          "name": "List companies",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/companies"
+          }
+        },
+        {
+          "name": "Get company",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/companies/1"
+          }
+        },
+        {
+          "name": "Create company",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company\": {\n    \"name\": \"Acme Corp\",\n    \"domain\": \"acme.com\"\n  }\n}"
+            },
+            "url": "{{base_url}}/companies"
+          }
+        },
+        {
+          "name": "Update company",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"company\": {\n    \"name\": \"Acme Inc\",\n    \"domain\": \"acme.io\"\n  }\n}"
+            },
+            "url": "{{base_url}}/companies/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Company users",
+      "item": [
+        {
+          "name": "List company users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/companies/1/users"
+          }
+        },
+        {
+          "name": "Add user to company",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"user\": {\n    \"email\": \"recruiter@acme.com\",\n    \"password\": \"pass123\",\n    \"password_confirmation\": \"pass123\"\n  },\n  \"role\": \"Recruiter\"\n}"
+            },
+            "url": "{{base_url}}/companies/1/users"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "List jobs",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/jobs?status=published", "host": ["{{base_url}}"], "path": ["jobs"], "query": [{ "key": "status", "value": "published" }] }
+          }
+        },
+        {
+          "name": "Get job",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/jobs/1"
+          }
+        },
+        {
+          "name": "Create job",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"title\": \"Senior Rails Developer\",\n    \"description\": \"Build APIs with Rails 7 and PostgreSQL.\",\n    \"status\": \"published\",\n    \"department\": \"Engineering\",\n    \"location\": \"Remote\"\n  }\n}"
+            },
+            "url": "{{base_url}}/jobs"
+          }
+        },
+        {
+          "name": "Update job",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"job\": {\n    \"status\": \"closed\"\n  }\n}"
+            },
+            "url": "{{base_url}}/jobs/1"
+          }
+        },
+        {
+          "name": "Delete job",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/jobs/1"
+          }
+        },
+        {
+          "name": "Top candidates for job",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/jobs/1/top_candidates"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Candidates",
+      "item": [
+        {
+          "name": "List candidates",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/candidates?status=new", "host": ["{{base_url}}"], "path": ["candidates"], "query": [{ "key": "status", "value": "new" }] }
+          }
+        },
+        {
+          "name": "Get candidate",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/candidates/1"
+          }
+        },
+        {
+          "name": "Create candidate",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidate\": {\n    \"name\": \"Jane Doe\",\n    \"email\": \"jane@example.com\",\n    \"phone\": \"+1234567890\",\n    \"resume_url\": \"https://example.com/resume.pdf\",\n    \"linkedin_url\": \"https://linkedin.com/in/jane\",\n    \"status\": \"new\"\n  }\n}"
+            },
+            "url": "{{base_url}}/candidates"
+          }
+        },
+        {
+          "name": "Update candidate",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"candidate\": {\n    \"status\": \"screening\"\n  }\n}"
+            },
+            "url": "{{base_url}}/candidates/1"
+          }
+        },
+        {
+          "name": "Delete candidate",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/candidates/1"
+          }
+        },
+        {
+          "name": "Parse resume",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"resume_text\": \"Experienced developer with Ruby, Rails, PostgreSQL and API design.\"\n}"
+            },
+            "url": "{{base_url}}/candidates/1/parse_resume"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Applications",
+      "item": [
+        {
+          "name": "List applications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/applications?job_id=1&status=applied", "host": ["{{base_url}}"], "path": ["applications"], "query": [{ "key": "job_id", "value": "1" }, { "key": "status", "value": "applied" }] }
+          }
+        },
+        {
+          "name": "Get application",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/applications/1"
+          }
+        },
+        {
+          "name": "Create application",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application\": {\n    \"job_id\": 1,\n    \"candidate_id\": 1,\n    \"status\": \"applied\",\n    \"applied_at\": \"2025-03-17T12:00:00Z\"\n  }\n}"
+            },
+            "url": "{{base_url}}/applications"
+          }
+        },
+        {
+          "name": "Update application",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"application\": {\n    \"status\": \"interview\"\n  }\n}"
+            },
+            "url": "{{base_url}}/applications/1"
+          }
+        },
+        {
+          "name": "Delete application",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/applications/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interviews",
+      "item": [
+        {
+          "name": "List interviews",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/interviews?application_id=1", "host": ["{{base_url}}"], "path": ["interviews"], "query": [{ "key": "application_id", "value": "1" }] }
+          }
+        },
+        {
+          "name": "Get interview",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/interviews/1"
+          }
+        },
+        {
+          "name": "Create interview",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interview\": {\n    \"application_id\": 1,\n    \"round_type\": \"technical\",\n    \"interviewer_id\": 1,\n    \"scheduled_at\": \"2025-03-20T14:00:00Z\",\n    \"status\": \"scheduled\"\n  }\n}"
+            },
+            "url": "{{base_url}}/interviews"
+          }
+        },
+        {
+          "name": "Update interview",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"interview\": {\n    \"status\": \"completed\"\n  }\n}"
+            },
+            "url": "{{base_url}}/interviews/1"
+          }
+        },
+        {
+          "name": "Delete interview",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/interviews/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Feedback",
+      "item": [
+        {
+          "name": "List feedback for interview",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/feedback/1"
+          }
+        },
+        {
+          "name": "Create feedback",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feedback\": {\n    \"interview_id\": 1,\n    \"rating\": 4,\n    \"strengths\": \"Strong technical skills\",\n    \"weaknesses\": \"Could improve communication\",\n    \"recommendation\": \"hire\"\n  }\n}"
+            },
+            "url": "{{base_url}}/feedbacks"
+          }
+        },
+        {
+          "name": "Get feedback",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/feedbacks/1"
+          }
+        },
+        {
+          "name": "Update feedback",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"feedback\": {\n    \"rating\": 5,\n    \"recommendation\": \"strong_hire\"\n  }\n}"
+            },
+            "url": "{{base_url}}/feedbacks/1"
+          }
+        },
+        {
+          "name": "Delete feedback",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/feedbacks/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Summary",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/dashboard/summary"
+          }
+        },
+        {
+          "name": "Pipeline",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/dashboard/pipeline"
+          }
+        },
+        {
+          "name": "Reports",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/dashboard/reports"
+          }
+        }
+      ]
+    }
+  ]
+}
