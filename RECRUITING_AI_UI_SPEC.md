@@ -6,6 +6,10 @@
 
 Build a React Admin UI for the recruiting-ai platform.
 
+**Repo folders (this workspace):**
+- Backend: `recruiting-ai-backend`
+- Frontend: `recruiting-ai-frontend`
+
 The backend is a Rails 7 API with the following modules:
 
 - Authentication (JWT) — recruiters
@@ -89,6 +93,7 @@ Configure Axios with:
 - automatic JWT token injection (e.g. from `localStorage.getItem("token")`)
 - request interceptor for `Authorization: Bearer <token>`
 - response error handling: on 401, clear token and dispatch auth-change **only when the request was not to /login or /signup** (so failed login/signup does not clear token and 401 from login means “invalid credentials”, not session expired)
+- For network/debuggability, surface clearer messages for “API unreachable” cases (e.g. include the configured base URL when Axios has no `response`).
 
 ---
 
@@ -319,6 +324,10 @@ src/
 
 **Important edge case (localStorage sessions):**
 - If an older stored recruiter session exists without `user.roles`, the UI should avoid redirect loops. `RoleProtectedRoute` should skip RBAC redirects until roles are available; backend remains the source of truth.
+
+**Stability notes:**
+- Hooks that auto-fetch in `useEffect` should avoid **unhandled promise rejections** (use `fetchX().catch(() => {})`) while still setting error state.
+- Auth contexts should avoid unnecessary state updates when receiving an auth-change event with unchanged payload.
 
 **Actions:** Hide or disable create/edit/delete buttons based on permissions (e.g. "Create job" only when `canManageJobs`; "Update status" on applications when `canUpdateApplication`; "Schedule interview" when `canManageInterviews`). Backend remains the source of truth and returns 403 for disallowed API calls.
 

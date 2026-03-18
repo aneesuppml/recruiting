@@ -17,7 +17,7 @@ Rails API backend for a multi-tenant Recruiting/ATS platform. Provides recruiter
 From the backend folder:
 
 ```bash
-cd recruiting-ai
+cd recruiting-ai-backend
 bundle install
 rails db:create db:migrate
 rails server

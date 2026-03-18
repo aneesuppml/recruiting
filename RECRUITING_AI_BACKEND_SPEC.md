@@ -8,6 +8,8 @@ Create a new Rails API-only project for a recruiting platform.
 
 **Project name:** recruiting-ai  
 
+**Repo folder name (this workspace):** `recruiting-ai-backend` (backend) and `recruiting-ai-frontend` (frontend).
+
 **Target stack:**
 - Ruby 3.1.x
 - Rails 7.x
@@ -313,6 +315,7 @@ Provide analytics endpoints.
 The project should be ready for:
 
 ```bash
+cd recruiting-ai-backend
 bundle install
 rails db:create
 rails db:migrate
