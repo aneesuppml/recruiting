@@ -103,7 +103,7 @@ export function getRequiredPermissionForPath(path) {
 
 /** First path the user is allowed to see (for default redirect when they lack dashboard). */
 export function getDefaultPathForUser(user) {
-  if (user?.company_status === "pending") return "/pending-approval";
+  if (user?.company_status === "pending" || user?.company_status === "rejected") return "/pending-approval";
 
   const perms = getPermissions(user);
   if (perms.canAccessSuperAdmin) return "/super-admin/companies";

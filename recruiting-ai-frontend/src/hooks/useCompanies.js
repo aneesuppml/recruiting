@@ -60,12 +60,16 @@ export function useCompanies() {
     }
   }, []);
 
-  const createCompany = async (name, domain) => {
+  const createCompany = async (payload) => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await api.post("/companies", { company: { name, domain } });
-      setCompanies((prev) => [...prev, data]);
+      const { data } = await api.post("/companies", { company: payload });
+      // API returns { company, user, pending, ... } for create.
+      const createdCompany = data?.company;
+      if (createdCompany) {
+        setCompanies((prev) => [...prev, createdCompany]);
+      }
       return data;
     } catch (err) {
       const msg = err.response?.data?.errors?.join?.(" ") || err.response?.data?.error || "Failed to create company";

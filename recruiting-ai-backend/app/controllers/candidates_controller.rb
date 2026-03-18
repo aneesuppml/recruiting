@@ -11,8 +11,21 @@ class CandidatesController < ApplicationController
   before_action :require_can_manage_candidates!, only: %i[create update destroy]
 
   def index
-    candidates = current_company.candidates
+    # Also include external candidates (company_id NULL) that have applied to jobs
+    # within the active company.
+    #
+    # Avoid `or` between structurally incompatible relations (one side uses joins).
+    candidate_ids = Candidate.where(company_id: current_company.id).pluck(:id)
+    applied_ids =
+      Candidate.joins(applications: :job)
+               .where(jobs: { company_id: current_company.id })
+               .pluck(:id)
+
+    candidate_ids |= applied_ids
+
+    candidates = Candidate.where(id: candidate_ids)
     candidates = candidates.where(status: params[:status]) if params[:status].present?
+
     render json: candidates
   end
 
@@ -50,7 +63,15 @@ class CandidatesController < ApplicationController
 
   def authorize_candidate
     ensure_company!
-    render json: { error: "Forbidden" }, status: :forbidden unless @candidate.company_id == current_company.id
+    allowed_direct = @candidate.company_id == current_company.id
+    allowed_via_application =
+      @candidate
+        .applications
+        .joins(:job)
+        .where(jobs: { company_id: current_company.id })
+        .exists?
+
+    render json: { error: "Forbidden" }, status: :forbidden unless allowed_direct || allowed_via_application
   end
 
   def candidate_params

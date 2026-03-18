@@ -71,19 +71,27 @@ Responses include `user` and `token`. `user.roles` is returned for RBAC.
   - Company details (tenant onboarding): `company_name`, required unique `domain`, optional `company_size`, optional `industry`
   - Address: `address_line1`, optional `address_line2`, `city`, `state`, `country`, `postal_code`
   - Contact: `contact_email`, `contact_phone`
-- On successful signup the API returns `pending: true` (no active session token).
+- On successful signup the API returns `pending: true` and also a JWT `token`. The UI uses that session to render `/pending-approval`, but the backend continues to enforce restricted access while the tenant is `pending` or `rejected`.
 - `POST /login` behavior:
   - Allowed: company status `pending`
   - Blocked: company status `rejected` (403)
 - While authenticated and the company is `pending` or `rejected`, restricted API access is enforced:
-  - Allowed: `GET /profile`, `GET /company/status`
+  - Allowed (based on active tenant context):
+    - `GET /profile`, `PATCH /profile`
+    - `GET /company/status`
+    - `GET /companies` (company switching UI)
   - Everything else returns `403` with a clear error (e.g. `Company Pending Approval`)
 
 ### Companies & users
 
+- Multi-company ownership:
+  - Company ownership is enforced via `admin_user_id`.
+  - When a user selects an “active company”, the frontend sends `X-Company-ID: <active_company_id>` so the backend knows which tenant context to apply.
+  - Auth/profile payloads include `active_company_id` and `company_status` so the UI can redirect appropriately.
 - `GET /companies`
-- `GET /companies/:id`
-- `POST /companies`
+- `GET /companies/:id` (when the user has access to that tenant)
+- `POST /companies` (creates a new tenant in `pending` status; the logged-in admin becomes the tenant admin)
+- `PUT /companies/:id` (Super Admin can update tenant `active/status`)
 - `GET /companies/:company_id/users`
 - `POST /companies/:company_id/users`
 
@@ -140,6 +148,14 @@ Responses include `user` and `token`. `user.roles` is returned for RBAC.
 - `GET /dashboard/pipeline`
 - `GET /dashboard/reports`
 
+### Super Admin (platform-wide)
+
+- `GET /super-admin/companies`
+- `POST /super-admin/companies`
+- `PUT /super-admin/companies/:id`
+- `GET /super-admin/users`
+- `GET /super-admin/analytics/summary`
+
 ### Candidate-side (external job seekers)
 
 No recruiter token required:
@@ -151,6 +167,8 @@ No recruiter token required:
 
 Candidate token required:
 
+- `GET /candidate/jobs`
+- `GET /candidate/jobs/:id`
 - `GET /candidate/dashboard`
 - `GET /candidate/applications/:id`
 - `POST /candidate/applications`
@@ -168,12 +186,17 @@ RBAC is enforced server-side for all protected endpoints (403 on forbidden actio
 - **Hiring Manager**: view jobs/candidates/applications, participate in interview decisions/feedback
 - **Interviewer**: view only assigned interviews, submit feedback, limited access
 
+### Super Admin
+
+- **Super Admin** can access `/super-admin/*` and manage companies/users across all tenants.
+
 ### Company verification gating (pending tenants)
 
-- When `current_user.company.status` is `pending` or `rejected`, the backend blocks all restricted endpoints and returns `403 Forbidden` with a JSON error.
+- When the *active tenant context* has `status=pending` or `status=rejected`, the backend blocks restricted endpoints and returns `403 Forbidden` with a JSON error.
 - Pending/rejected users can still access:
-  - `GET /profile`
+  - `GET /profile`, `PATCH /profile`
   - `GET /company/status`
+  - `GET /companies` (company switching)
 
 ### Candidates
 

@@ -1,28 +1,38 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { usePublicJobs } from "../../hooks/usePublicJobs";
+import { useCandidateJobs } from "../../hooks/useCandidateJobs";
 import { Briefcase, MapPin } from "lucide-react";
+import { useCandidateAuthContext } from "../../context/CandidateAuthContext";
 
 export function JobBoard() {
-  const { jobs, loading, error, fetchJobs } = usePublicJobs();
+  const publicJobs = usePublicJobs();
+  const candidateJobsHook = useCandidateJobs();
+  const { isCandidateAuthenticated } = useCandidateAuthContext();
   const [title, setTitle] = useState("");
   const [location, setLocation] = useState("");
   const [skills, setSkills] = useState("");
   const [experienceLevel, setExperienceLevel] = useState("");
 
   useEffect(() => {
-    fetchJobs();
-  }, [fetchJobs]);
+    const fn = isCandidateAuthenticated ? candidateJobsHook.fetchJobs : publicJobs.fetchJobs;
+    fn();
+  }, [isCandidateAuthenticated, publicJobs.fetchJobs, candidateJobsHook.fetchJobs]);
 
   const handleSearch = (e) => {
     e.preventDefault();
-    fetchJobs({
+    const fn = isCandidateAuthenticated ? candidateJobsHook.fetchJobs : publicJobs.fetchJobs;
+    fn({
       title: title || undefined,
       location: location || undefined,
       skills: skills || undefined,
       experience_level: experienceLevel || undefined,
     });
   };
+
+  const jobs = isCandidateAuthenticated ? candidateJobsHook.jobs : publicJobs.jobs;
+  const loading = isCandidateAuthenticated ? candidateJobsHook.loading : publicJobs.loading;
+  const error = isCandidateAuthenticated ? candidateJobsHook.error : publicJobs.error;
 
   return (
     <div className="min-h-screen bg-white">

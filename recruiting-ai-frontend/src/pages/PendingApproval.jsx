@@ -25,15 +25,23 @@ export function PendingApproval() {
         if (!cancelled) {
           setData(res);
           if (res?.company?.status) {
-              if (user?.id) {
-                updateUser({
-                  id: user.id,
-                  email: user.email,
-                  name: user.name,
-                  company_id: user.company_id,
-                  company_status: res.company.status,
-                });
+            if (user?.id) {
+              let roles = user.roles;
+              if (!Array.isArray(roles) || roles.length === 0) {
+                const { data: profile } = await api.get("/profile");
+                roles = profile?.roles;
               }
+
+              updateUser({
+                id: user.id,
+                email: user.email,
+                name: user.name,
+                company_id: user.company_id,
+                active_company_id: res.company.id,
+                company_status: res.company.status,
+                roles,
+              });
+            }
           }
         }
       } catch (err) {

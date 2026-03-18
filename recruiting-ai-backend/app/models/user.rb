@@ -4,6 +4,7 @@ class User < ApplicationRecord
   has_secure_password
 
   belongs_to :company, optional: true
+  has_many :admin_companies, class_name: "Company", foreign_key: :admin_user_id, dependent: :nullify
   has_many :memberships, dependent: :destroy
   has_many :roles, through: :memberships
   has_many :jobs_created, class_name: "Job", foreign_key: :created_by_id, dependent: :nullify

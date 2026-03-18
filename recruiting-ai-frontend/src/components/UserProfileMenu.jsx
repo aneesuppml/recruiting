@@ -84,7 +84,7 @@ export function UserProfileMenu() {
             Profile
           </button>
 
-          {user.company_status === "pending" ? (
+          {user.company_status === "pending" || user.company_status === "rejected" ? (
             <button
               type="button"
               onClick={() => handleNav("/pending-approval")}

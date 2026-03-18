@@ -202,6 +202,14 @@ src/
 - **Dropdown items:** Profile → navigate to /settings/profile; Settings → navigate to /settings; Logout → call logout from auth context, redirect to /login. Dropdown header shows name and email.
 - **Icons:** Use lucide-react (no emojis).
 
+### Company switching (multi-company ownership)
+
+- Admin users who own multiple companies see a `CompanySwitcher` dropdown in the Navbar.
+- Selecting a company updates auth state (`active_company_id` and `company_status`) and redirects:
+  - to `/pending-approval` when the selected company is `pending` or `rejected`
+  - otherwise to `/dashboard`
+- The frontend sets `X-Company-ID: <active_company_id>` via the Axios interceptor so the backend knows which tenant context to use.
+
 ### Super Admin header & profile menu
 
 Super Admin uses a separate layout and header:
@@ -249,7 +257,9 @@ New tenant onboarding behavior:
   - company name and domain
   - full address + contact info
   - status: show **Pending Approval** when `status=pending`
-  - message: “Your company is under verification. Access will be granted once approved.”
+  - message: status=pending → “Your company is under verification. Access will be granted once approved.”; status=rejected → “Your company is not ready to access the full app.”
+- On load, sync `active_company_id` + `company_status` in `AuthContext` based on the selected tenant.
+- If `user.roles` is missing/empty in stored session data, re-fetch `/profile` before relying on sidebar permission gating.
 
 **Frontend route guards:**
 - `PendingCompanyRoute` (used inside `ProtectedRoute`) redirects pending tenants away from restricted routes to `/pending-approval`
@@ -274,7 +284,7 @@ New tenant onboarding behavior:
 
 **Hooks:** useCandidateAuth (signup, login; do not rethrow on error), usePublicJobs (public/jobs), useCandidateApplications (candidate/dashboard, candidate/applications; use candidateApi).
 
-**Job board:** List active jobs with filters (title, location, skills, experience); link to job detail; “Apply” links to /candidate/apply/:jobId (requires candidate login). Apply form: resume_url, cover_note.
+**Job board:** List active jobs with filters (title, location, skills, experience); link to job detail; “Apply” links to /candidate/apply/:jobId (requires candidate login). Apply form: resume_url, cover_note. When a candidate is authenticated, job listing/details come from `GET /candidate/jobs` and `GET /candidate/jobs/:id` (scoped by candidate `company_id` when present); otherwise use the public job board endpoints.
 
 **Candidate dashboard:** List my applications (job title, company, applied date, status, AI score); link to application status. Application status page shows interview details (date, time, meeting link, interviewer) when scheduled.
 
@@ -304,9 +314,9 @@ New tenant onboarding behavior:
 
 **Pages:** Companies.jsx, Users.jsx
 
-**Features:** create company, invite users, assign roles.
+**Features:** create companies (owned by the logged-in admin; no separate admin/owner assignment during creation), manage users for owned companies, and switch the active company via the header dropdown.
 
-**APIs:** POST /companies, GET /companies/:id/users, POST /companies/:id/users.
+**APIs:** GET /companies (owned companies), POST /companies (creates a `pending` tenant for the logged-in admin), GET /companies/:id/users, POST /companies/:id/users.
 
 **Permission handling:** GET and POST `/companies/:id/users` return **403 Forbidden** for users who are not Admin or Recruiter for that company. The UI must handle 403 in the company-users hook (e.g. `fetchCompanyUsers`): show a clear message (“You don’t have permission to view users for this company. Only Admins and Recruiters can.”), set users list to empty, and do not rethrow so there is no unhandled rejection when called from `useEffect`.
 
@@ -453,4 +463,4 @@ Design the UI similar to a modern ATS recruiting dashboard used by recruiting te
 
 ---
 
-*Last updated: Super Admin module (routes, layout, companies/users/analytics pages, header profile dropdown + /super-admin/profile); RBAC UI (permissions + `RoleProtectedRoute` + `SuperAdminRoute`); company onboarding verification for pending tenants (`/pending-approval` page, `PendingCompanyRoute`, Navbar/Sidebar gating, and `GET /company/status`); blue/white/dark-grey theme, improved hook error handling, and candidate UI as before.*
+*Last updated: Super Admin module (routes, layout, companies/users/analytics pages, header profile dropdown + /super-admin/profile); RBAC UI (`RoleProtectedRoute` + `SuperAdminRoute`); multi-company switching (Navbar `CompanySwitcher`, `active_company_id`/`company_status`, and `X-Company-ID`); pending/rejected gating (`/pending-approval`, `PendingCompanyRoute`, and `GET /company/status` + `GET /companies`); candidate UI now uses `GET /candidate/jobs` and `GET /candidate/jobs/:id` for job listing/details when candidate is authenticated; blue/white/dark-grey theme.*

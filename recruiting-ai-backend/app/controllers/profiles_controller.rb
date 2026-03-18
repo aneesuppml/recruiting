@@ -2,6 +2,7 @@
 
 class ProfilesController < ApplicationController
   include Authenticatable
+  include CompanyScope
 
   def show
     render json: profile_json(current_user)
@@ -33,12 +34,13 @@ class ProfilesController < ApplicationController
   end
 
   def profile_json(user)
+    company = current_company
     {
       id: user.id,
       email: user.email,
       name: user.name,
-      company_id: user.company_id,
-      company_name: user.company&.name,
+      company_id: company&.id,
+      company_name: company&.name,
       roles: user.roles.pluck(:name)
     }
   end

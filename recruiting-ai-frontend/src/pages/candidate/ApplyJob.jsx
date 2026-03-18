@@ -1,20 +1,23 @@
 import { useState, useEffect } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import api from "../../services/api";
 import { useCandidateApplications } from "../../hooks/useCandidateApplications";
+import candidateApi from "../../services/candidateApi";
+import { useCandidateAuthContext } from "../../context/CandidateAuthContext";
 
 export function ApplyJob() {
   const { jobId } = useParams();
   const navigate = useNavigate();
   const { apply, loading, error, setError } = useCandidateApplications();
+  const { isCandidateAuthenticated } = useCandidateAuthContext();
   const [job, setJob] = useState(null);
   const [resumeUrl, setResumeUrl] = useState("");
   const [coverNote, setCoverNote] = useState("");
 
   useEffect(() => {
     if (!jobId) return;
-    api.get(`/public/jobs/${jobId}`).then(({ data }) => setJob(data)).catch(() => setJob(null));
-  }, [jobId]);
+    const request = candidateApi.get(`/candidate/jobs/${jobId}`).catch(() => null);
+    request.then((res) => setJob(res?.data ?? null)).catch(() => setJob(null));
+  }, [jobId, isCandidateAuthenticated, candidateApi]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

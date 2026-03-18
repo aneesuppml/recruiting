@@ -76,8 +76,8 @@ Implement JWT-based authentication first.
 
 **Profile (current user):**
 - Add optional **name** field to User (migration).
-- **ProfilesController** (authenticated): GET /profile (return current user with id, email, name, company_id, **company_name** (from `user.company&.name` so UI can show company name instead of ID), roles). PATCH /profile (update name, email, and optionally password; require current_password when changing password). Return same profile JSON on update so clients can refresh auth state.
-- Auth login/signup user_json should include **name** when present.
+- **ProfilesController** (authenticated): GET /profile (return current user with id, email, name, `company_id`, and **company_name** for the active company context; roles). PATCH /profile (update name, email, and optionally password; require current_password when changing password). Return same profile JSON on update so clients can refresh auth state.
+- Auth login/signup user_json should include **name** when present, and also include `active_company_id` and `company_status` (so the UI can redirect to `/pending-approval` and send `X-Company-ID` for subsequent requests).
 
 ---
 
@@ -88,12 +88,12 @@ Support multiple companies using the platform.
 **Models:** Company, User, Role, Membership
 
 **Relationships:**
-- **Company** — has_many users
-- **User** — belongs_to company; has_many roles through membership
+- **Company** — belongs_to `admin_user` (User, optional), has_many users/memberships, has_many jobs, has_many candidates
+- **User** — has_many `admin_companies` (Company where `admin_user_id == user.id`), belongs_to `company` (legacy/primary association; optional). Roles are managed via `Membership`.
 
 **Fields:**
-- **Company:** name, domain
-- **User:** email, password_digest, company_id, name (optional), (roles via Membership)
+- **Company:** name, domain, `status` (`pending|active|rejected`), onboarding fields, and optional `admin_user_id`
+- **User:** email, password_digest, name (optional), optional `company_id` (primary association) + memberships/roles
 
 **Features:**
 - Company registration
@@ -101,8 +101,10 @@ Support multiple companies using the platform.
 - Role-based access control
 
 **APIs:**
-- POST /companies
+- POST /companies (create a new tenant/company; created companies start in `pending`)
+- GET /companies (list companies the current admin user owns; Super Admin can list all)
 - GET /companies/:id
+- PUT /companies/:id
 - POST /companies/:id/users
 - GET /companies/:id/users
 
@@ -110,12 +112,18 @@ Support multiple companies using the platform.
 
 **Authorization (company users endpoints):**
 - **GET /companies/:id/users** and **POST /companies/:id/users** must be restricted to:
-  - the same company: `current_user.company_id == company.id`
+  - the same company the user can access (either via admin ownership using `admin_user_id` or via the user’s primary/legacy `company_id`)
   - and role: **Admin** or **Recruiter** only (`current_user.admin? || current_user.recruiter?`)
 - If the user is in a different company or has role **Interviewer** (or no Admin/Recruiter role), respond with **403 Forbidden** and a JSON body such as `{ "error": "Forbidden" }`.
 - This ensures only Admins and Recruiters can list or invite company users; frontends should handle 403 with a clear message (e.g. “You don’t have permission to view users for this company. Only Admins and Recruiters can.”).
 
 ---
+
+### Active company context & switching (multi-company ownership)
+
+- The frontend selects an “active company” (`active_company_id`) when a user owns multiple companies.
+- For authenticated requests, the frontend sends `X-Company-ID: <active_company_id>` to make the backend operate on that tenant context.
+- If `X-Company-ID` is missing, the backend derives the target company from admin ownership (`admin_user_id`) or the user’s primary/legacy `company_id`.
 
 ## Company Verification (Pending Tenants)
 
@@ -136,10 +144,11 @@ To support multi-tenant onboarding with approval:
 - Users whose company status is `rejected` must not be able to log in
 
 ### Restricted API access while pending
-- For authenticated API requests, if `current_user.company.status` is `pending` (or `rejected`):
+- For authenticated API requests, if the *active company* status is `pending` (or `rejected`):
   - allow only:
-    - `GET /profile`
-    - `GET /company/status`
+    - `GET /profile` and `PATCH /profile` (profile is editable while pending)
+    - `GET /company/status` (pending UI needs tenant + admin identity)
+    - `GET /companies` (allow switching between owned companies while pending/rejected)
   - all other endpoints should return `403 Forbidden` with a JSON error such as:
     - `{ "error": "Company Pending Approval" }`
 
@@ -148,7 +157,7 @@ To support multi-tenant onboarding with approval:
   - company fields required by the pending UI:
     - company name, domain, address, contact, size/industry, status, created_at
   - admin user details for that company:
-    - name and email
+    - name and email (from `company.admin_user`)
 
 ---
 
@@ -287,7 +296,10 @@ Provide analytics endpoints.
 - **Public::JobsController**: GET **public/jobs** (only published jobs), GET **public/jobs/:id**.
 - Filter by title, location, skills, experience_level. Include company in response for show.
 
-**Candidate-scoped APIs (candidate JWT required):**
+**Candidate-scoped job board + application APIs (candidate JWT required):**
+- **CandidateJobsController**:
+  - GET **candidate/jobs** (active jobs; optional filters; if `current_candidate.company_id` is present, scope to that company)
+  - GET **candidate/jobs/:id** (scoped job details; return 404 if job does not belong to the candidate company when scoped)
 - **CandidateApplicationsController**: GET **candidate/dashboard** (my applications with job/company), GET **candidate/applications/:id** (with interview details when scheduled), POST **candidate/applications** (job_id, resume_url, cover_note; candidate_id from current_candidate).
 - Application status flow: applied → screening → shortlisted → interview → under_review → hired/rejected.
 - When interview is scheduled, expose interview date/time, meeting_link, interviewer for candidate.
@@ -430,4 +442,4 @@ Generate seed data that populates realistic sample data for all models.
 
 ---
 
-*Last updated: RBAC across backend via `Authorizable` (Admin/Recruiter/Hiring Manager/Interviewer), roles included in auth/profile JSON; Hiring Manager role seeded; interviewer scoping for interviews/feedback; candidate-side APIs and profile/company users as before.*
+*Last updated: RBAC across backend via `Authorizable` (Admin/Recruiter/Hiring Manager/Interviewer), roles included in auth/profile JSON; multi-company ownership via `admin_user_id`; active tenant context via `X-Company-ID` + `active_company_id`/`company_status`; pending restrictions allow `/profile`, `/company/status`, and `GET /companies`; candidate job scoping via `GET /candidate/jobs` and `GET /candidate/jobs/:id` in addition to candidate applications.*

@@ -53,6 +53,10 @@ class AuthController < ApplicationController
       ensure_default_roles
       assign_admin_role(user)
 
+      if Company.column_names.include?("admin_user_id") && company.admin_user_id.nil?
+        company.update!(admin_user_id: user.id)
+      end
+
       token = JwtService.encode({ user_id: user.id })
       render json: {
         user: user_json(user),
@@ -69,7 +73,16 @@ class AuthController < ApplicationController
   def login
     user = User.find_by(email: login_params[:email])
     if user&.authenticate(login_params[:password])
-      if user.company&.status == "rejected"
+      active_company =
+        if Company.column_names.include?("admin_user_id") && user.admin?
+          active_company = Company.find_by(id: user.company_id) if user.company_id.present?
+          active_company ||= Company.find_by(admin_user_id: user.id)
+          active_company
+        else
+          user.company
+        end
+
+      if active_company&.status == "rejected"
         render json: { error: "Account Rejected" }, status: :forbidden
         return
       end
@@ -113,13 +126,24 @@ class AuthController < ApplicationController
   end
 
   def user_json(user)
+    active_company = nil
+
+    if Company.column_names.include?("admin_user_id") && user.admin?
+      # Prefer explicit single-company association if present.
+      active_company = Company.find_by(id: user.company_id) if user.company_id.present?
+      active_company ||= Company.find_by(admin_user_id: user.id)
+    else
+      active_company = user.company
+    end
+
     {
       id: user.id,
       email: user.email,
       name: user.name,
       company_id: user.company_id,
+      active_company_id: active_company&.id || user.company_id,
       roles: user.role_names,
-      company_status: user.company&.status
+      company_status: active_company&.status
     }
   end
 

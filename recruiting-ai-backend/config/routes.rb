@@ -16,6 +16,8 @@ Rails.application.routes.draw do
   get "public/jobs/:id", to: "public/jobs#show", as: :public_job
 
   # Candidate-scoped (candidate JWT required)
+  get "candidate/jobs", to: "candidate_jobs#index"
+  get "candidate/jobs/:id", to: "candidate_jobs#show"
   get "candidate/dashboard", to: "candidate_applications#index"
   get "candidate/applications/:id", to: "candidate_applications#show"
   post "candidate/applications", to: "candidate_applications#create"

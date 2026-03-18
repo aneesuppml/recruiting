@@ -15,7 +15,7 @@ export function PendingCompanyRoute({ children }) {
 
   if (isSuperAdmin) return children;
 
-  if (user.company_status !== "pending") return children;
+  if (user.company_status !== "pending" && user.company_status !== "rejected") return children;
 
   const path = location.pathname;
   if (allowedPendingPaths.includes(path)) return children;

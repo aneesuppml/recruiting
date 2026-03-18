@@ -55,7 +55,8 @@ export function useAuth() {
 
       if (data?.token) {
         setAuth(data.user, data.token);
-        const dest = data?.user?.company_status === "pending" ? "/pending-approval" : "/dashboard";
+        const dest =
+          data?.user?.company_status === "pending" || data?.user?.company_status === "rejected" ? "/pending-approval" : "/dashboard";
         navigate(dest);
       } else if (data?.pending) {
         navigate("/pending-approval");
@@ -80,7 +81,8 @@ export function useAuth() {
         user: { email, password },
       });
       setAuth(data.user, data.token);
-      const dest = data?.user?.company_status === "pending" ? "/pending-approval" : "/dashboard";
+      const dest =
+        data?.user?.company_status === "pending" || data?.user?.company_status === "rejected" ? "/pending-approval" : "/dashboard";
       navigate(dest);
       return data;
     } catch (err) {

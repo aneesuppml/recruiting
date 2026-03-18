@@ -41,23 +41,44 @@ ActiveRecord::Base.transaction do
 
   # --- 2. Users: 1 Admin, 2 Recruiters, 2 Interviewers per company (15 total) ---
   users_by_company = {}
+
+  # Multi-company ownership seed:
+  # Create ONE admin user and make it the admin_user for all tenant companies
+  # (if the admin_user_id column exists).
+  admin_owner = nil
+  if Company.column_names.include?("admin_user_id")
+    admin_owner = User.create!(
+      name: "Admin Owner",
+      email: "admin_owner@example.com",
+      password: SEED_PASSWORD,
+      password_confirmation: SEED_PASSWORD,
+      company_id: companies.first.id
+    )
+    Membership.create!(user: admin_owner, role: admin_role)
+  end
+
   companies.each do |company|
     users_by_company[company.id] = {
-      admin: nil,
+      admin: admin_owner,
       recruiters: [],
       hiring_managers: [],
       interviewers: []
     }
 
-    admin = User.create!(
-      name: Faker::Name.name,
-      email: "admin_#{company.id}_#{Faker::Internet.unique.email(domain: company.domain)}",
-      password: SEED_PASSWORD,
-      password_confirmation: SEED_PASSWORD,
-      company_id: company.id
-    )
-    Membership.create!(user: admin, role: admin_role)
-    users_by_company[company.id][:admin] = admin
+    if admin_owner && Company.column_names.include?("admin_user_id")
+      company.update!(admin_user_id: admin_owner.id)
+    elsif !admin_owner
+      # Backward-compatible seed: one admin per company if admin_user_id isn't present.
+      admin = User.create!(
+        name: Faker::Name.name,
+        email: "admin_#{company.id}_#{Faker::Internet.unique.email(domain: company.domain)}",
+        password: SEED_PASSWORD,
+        password_confirmation: SEED_PASSWORD,
+        company_id: company.id
+      )
+      Membership.create!(user: admin, role: admin_role)
+      users_by_company[company.id][:admin] = admin
+    end
 
     2.times do
       u = User.create!(

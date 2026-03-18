@@ -1,15 +1,25 @@
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { usePublicJobs } from "../../hooks/usePublicJobs";
+import { useCandidateJobs } from "../../hooks/useCandidateJobs";
 import { MapPin, Building2 } from "lucide-react";
+import { useCandidateAuthContext } from "../../context/CandidateAuthContext";
 
 export function JobDetails() {
   const { id } = useParams();
-  const { job, loading, error, fetchJob } = usePublicJobs();
+  const publicJobs = usePublicJobs();
+  const candidateJobs = useCandidateJobs();
+  const { isCandidateAuthenticated } = useCandidateAuthContext();
+
+  const job = isCandidateAuthenticated ? candidateJobs.job : publicJobs.job;
+  const loading = isCandidateAuthenticated ? candidateJobs.loading : publicJobs.loading;
+  const error = isCandidateAuthenticated ? candidateJobs.error : publicJobs.error;
 
   useEffect(() => {
-    if (id) fetchJob(Number(id));
-  }, [id, fetchJob]);
+    if (!id) return;
+    const fn = isCandidateAuthenticated ? candidateJobs.fetchJob : publicJobs.fetchJob;
+    fn(Number(id));
+  }, [id, isCandidateAuthenticated, publicJobs.fetchJob, candidateJobs.fetchJob]);
 
   if (loading && !job) {
     return (

@@ -40,6 +40,7 @@ export function AuthProvider({ children }) {
           prev.email === next.email &&
           prev.name === next.name &&
           prev.company_id === next.company_id &&
+          prev.active_company_id === next.active_company_id &&
           prev.company_status === next.company_status
         ) {
           // roles may be present; compare shallowly if both have roles arrays

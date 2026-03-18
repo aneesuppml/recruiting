@@ -34,7 +34,7 @@ export function Sidebar() {
   const { user } = useAuthContext();
   if (permissions.isSuperAdmin) return null;
 
-  if (user?.company_status === "pending") {
+  if (user?.company_status === "pending" || user?.company_status === "rejected") {
     return (
       <aside className="fixed left-0 top-14 z-20 h-[calc(100vh-3.5rem)] w-56 border-r border-gray-800 bg-gray-900">
         <nav className="flex flex-col gap-1 p-3">

@@ -15,6 +15,18 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // Multi-company context: inform backend which tenant to treat as "active".
+    try {
+      const storedUser = localStorage.getItem("user");
+      const parsedUser = storedUser ? JSON.parse(storedUser) : null;
+      const activeCompanyId = parsedUser?.active_company_id || parsedUser?.company_id;
+      if (activeCompanyId) {
+        config.headers["X-Company-ID"] = String(activeCompanyId);
+      }
+    } catch {
+      // ignore JSON parse errors
+    }
     return config;
   },
   (error) => Promise.reject(error)
