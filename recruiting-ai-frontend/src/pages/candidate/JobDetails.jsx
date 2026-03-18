@@ -13,15 +13,15 @@ export function JobDetails() {
 
   if (loading && !job) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   if (error || !job) {
     return (
-      <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="min-h-screen bg-white px-4 py-8">
         <div className="mx-auto max-w-2xl rounded-lg bg-red-50 p-4 text-red-700">
           {error || "Job not found."}
           <Link to="/candidate/jobs" className="ml-2 underline">Back to job board</Link>
@@ -31,11 +31,11 @@ export function JobDetails() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-3xl px-4 py-8">
         <Link
           to="/candidate/jobs"
-          className="mb-6 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="mb-6 inline-block text-sm font-medium text-blue-700 hover:text-blue-600"
         >
           ← Back to job board
         </Link>
@@ -74,7 +74,7 @@ export function JobDetails() {
           <div className="mt-8">
             <Link
               to={`/candidate/apply/${job.id}`}
-              className="inline-flex rounded-lg bg-indigo-600 px-6 py-2.5 font-medium text-white hover:bg-indigo-700"
+              className="inline-flex rounded-lg bg-blue-600 px-6 py-2.5 font-medium text-white shadow-sm hover:bg-blue-700"
             >
               Apply for this job
             </Link>

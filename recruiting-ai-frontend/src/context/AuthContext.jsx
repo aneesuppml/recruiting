@@ -28,8 +28,19 @@ export function AuthProvider({ children }) {
     const handleAuthChange = () => {
       const t = localStorage.getItem("token");
       const u = localStorage.getItem("user");
-      setToken(t);
-      setUser(u ? JSON.parse(u) : null);
+      setToken((prev) => (prev === t ? prev : t));
+      setUser((prev) => {
+        const next = u ? JSON.parse(u) : null;
+        // Avoid needless state updates that can cause render loops
+        if (!prev && !next) return prev;
+        if (prev && next && prev.id === next.id && prev.email === next.email && prev.name === next.name && prev.company_id === next.company_id) {
+          // roles may be present; compare shallowly if both have roles arrays
+          const prevRoles = Array.isArray(prev.roles) ? prev.roles.join("|") : "";
+          const nextRoles = Array.isArray(next.roles) ? next.roles.join("|") : "";
+          if (prevRoles === nextRoles) return prev;
+        }
+        return next;
+      });
     };
     window.addEventListener("auth-change", handleAuthChange);
     return () => window.removeEventListener("auth-change", handleAuthChange);

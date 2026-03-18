@@ -1,7 +1,7 @@
 const statusColors = {
   applied: "bg-blue-100 text-blue-800",
   screening: "bg-purple-100 text-purple-800",
-  shortlisted: "bg-indigo-100 text-indigo-800",
+  shortlisted: "bg-blue-100 text-blue-800",
   interview: "bg-yellow-100 text-yellow-800",
   under_review: "bg-amber-100 text-amber-800",
   offer: "bg-orange-100 text-orange-800",
@@ -11,7 +11,7 @@ const statusColors = {
   published: "bg-green-100 text-green-800",
   closed: "bg-gray-100 text-gray-600",
   new: "bg-blue-100 text-blue-800",
-  scheduled: "bg-indigo-100 text-indigo-800",
+  scheduled: "bg-blue-100 text-blue-800",
   completed: "bg-green-100 text-green-800",
   cancelled: "bg-red-100 text-red-800",
   no_show: "bg-gray-100 text-gray-600",

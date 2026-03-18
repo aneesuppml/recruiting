@@ -13,15 +13,15 @@ export function ApplicationStatus() {
 
   if (loading && !application) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   if (error || !application) {
     return (
-      <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="min-h-screen bg-white px-4 py-8">
         <div className="mx-auto max-w-2xl rounded-lg bg-red-50 p-4 text-red-700">
           {error || "Application not found."}
           <Link to="/candidate/dashboard" className="ml-2 underline">Back to dashboard</Link>
@@ -33,11 +33,11 @@ export function ApplicationStatus() {
   const interview = application.interview;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-2xl px-4 py-8">
         <Link
           to="/candidate/dashboard"
-          className="mb-6 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="mb-6 inline-block text-sm font-medium text-blue-700 hover:text-blue-600"
         >
           ← Back to dashboard
         </Link>
@@ -47,7 +47,7 @@ export function ApplicationStatus() {
           <p className="mt-1 text-gray-600">{application.company_name}</p>
           <p className="mt-4">
             <span className="text-sm font-medium text-gray-500">Status: </span>
-            <span className="rounded bg-indigo-100 px-2 py-0.5 text-sm font-medium text-indigo-800 capitalize">
+            <span className="rounded bg-blue-100 px-2 py-0.5 text-sm font-medium text-blue-800 capitalize">
               {application.status.replace(/_/g, " ")}
             </span>
           </p>
@@ -57,7 +57,7 @@ export function ApplicationStatus() {
           </p>
 
           {interview && (
-            <div className="mt-8 rounded-lg border border-indigo-100 bg-indigo-50/50 p-6">
+            <div className="mt-8 rounded-lg border border-blue-100 bg-blue-50/40 p-6">
               <h2 className="font-medium text-gray-900">Interview details</h2>
               <dl className="mt-4 space-y-3">
                 <div className="flex items-center gap-2 text-sm">
@@ -79,7 +79,7 @@ export function ApplicationStatus() {
                       href={interview.meeting_link}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm font-medium text-indigo-600 hover:underline"
+                      className="text-sm font-medium text-blue-700 hover:underline"
                     >
                       Join meeting
                     </a>

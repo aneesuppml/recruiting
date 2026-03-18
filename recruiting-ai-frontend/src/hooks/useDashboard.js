@@ -1,6 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
 import api from "../services/api";
 
+function formatApiError(err, fallback) {
+  const apiBase = api?.defaults?.baseURL || "http://localhost:3000";
+  const serverMsg = err?.response?.data?.error;
+  if (serverMsg) return serverMsg;
+  if (err?.response?.status) return `${fallback} (HTTP ${err.response.status})`;
+  // Axios network errors (no response): backend down, CORS, wrong base URL, etc.
+  if (!err?.response) return `${fallback} (API unreachable at ${apiBase})`;
+  return fallback;
+}
+
 export function useDashboard() {
   const [summary, setSummary] = useState(null);
   const [pipeline, setPipeline] = useState(null);
@@ -16,7 +26,7 @@ export function useDashboard() {
       setSummary(data);
       return data;
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch summary");
+      setError(formatApiError(err, "Failed to fetch summary"));
       throw err;
     } finally {
       setLoading(false);
@@ -31,7 +41,7 @@ export function useDashboard() {
       setPipeline(data);
       return data;
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch pipeline");
+      setError(formatApiError(err, "Failed to fetch pipeline"));
       throw err;
     } finally {
       setLoading(false);
@@ -46,7 +56,7 @@ export function useDashboard() {
       setReports(data);
       return data;
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch reports");
+      setError(formatApiError(err, "Failed to fetch reports"));
       throw err;
     } finally {
       setLoading(false);
@@ -67,7 +77,7 @@ export function useDashboard() {
       setReports(repRes.data);
       return { summary: sumRes.data, pipeline: pipeRes.data, reports: repRes.data };
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch dashboard");
+      setError(formatApiError(err, "Failed to fetch dashboard"));
       throw err;
     } finally {
       setLoading(false);
@@ -75,7 +85,7 @@ export function useDashboard() {
   }, []);
 
   useEffect(() => {
-    fetchAll();
+    fetchAll().catch(() => {});
   }, [fetchAll]);
 
   return {

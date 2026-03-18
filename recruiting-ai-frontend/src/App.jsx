@@ -34,7 +34,7 @@ function Layout({ children }) {
     <>
       <Navbar />
       <Sidebar />
-      <main className="pl-56 pt-14 min-h-screen">
+      <main className="min-h-screen bg-white pl-56 pt-14">
         <div className="p-6">{children}</div>
       </main>
     </>
@@ -43,14 +43,14 @@ function Layout({ children }) {
 
 function PublicRoute({ children }) {
   const { isAuthenticated, loading, user } = useAuthContext();
-  if (loading) return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" /></div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-white"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>;
   if (isAuthenticated) return <Navigate to={getDefaultPathForUser(user)} replace />;
   return children;
 }
 
 function HomeRedirect() {
   const { isAuthenticated, loading, user } = useAuthContext();
-  if (loading) return <div className="flex min-h-screen items-center justify-center"><div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" /></div>;
+  if (loading) return <div className="flex min-h-screen items-center justify-center bg-white"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>;
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <Navigate to={getDefaultPathForUser(user)} replace />;
 }

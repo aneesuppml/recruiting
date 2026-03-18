@@ -96,7 +96,7 @@ export function useCompanies() {
   };
 
   useEffect(() => {
-    fetchCompanies();
+    fetchCompanies().catch(() => {});
   }, [fetchCompanies]);
 
   return {

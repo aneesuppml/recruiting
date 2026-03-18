@@ -27,27 +27,27 @@ export function ApplyJob() {
 
   if (!job && jobId) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
       </div>
     );
   }
 
   if (!job) {
     return (
-      <div className="min-h-screen bg-gray-50 px-4 py-8">
+      <div className="min-h-screen bg-white px-4 py-8">
         <p className="text-red-600">Job not found.</p>
-        <Link to="/candidate/jobs" className="mt-2 inline-block text-indigo-600">Back to job board</Link>
+        <Link to="/candidate/jobs" className="mt-2 inline-block text-blue-700 hover:underline">Back to job board</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-xl px-4 py-8">
         <Link
           to={`/candidate/jobs/${jobId}`}
-          className="mb-6 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          className="mb-6 inline-block text-sm font-medium text-blue-700 hover:text-blue-600"
         >
           ← Back to job
         </Link>
@@ -70,7 +70,7 @@ export function ApplyJob() {
                 value={resumeUrl}
                 onChange={(e) => setResumeUrl(e.target.value)}
                 placeholder="https://..."
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <div>
@@ -82,13 +82,13 @@ export function ApplyJob() {
                 rows={4}
                 value={coverNote}
                 onChange={(e) => setCoverNote(e.target.value)}
-                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-lg bg-indigo-600 py-2 font-medium text-white hover:bg-indigo-700 disabled:opacity-50"
+              className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white shadow-sm hover:bg-blue-700 disabled:opacity-50"
             >
               {loading ? "Submitting…" : "Submit application"}
             </button>

@@ -88,7 +88,7 @@ export function useCandidates(params = {}) {
   };
 
   useEffect(() => {
-    fetchCandidates();
+    fetchCandidates().catch(() => {});
   }, [fetchCandidates]);
 
   return {

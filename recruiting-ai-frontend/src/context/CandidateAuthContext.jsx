@@ -27,9 +27,15 @@ export function CandidateAuthProvider({ children }) {
 
   useEffect(() => {
     const handleChange = () => {
-      setToken(localStorage.getItem(CANDIDATE_TOKEN_KEY));
+      const t = localStorage.getItem(CANDIDATE_TOKEN_KEY);
+      setToken((prev) => (prev === t ? prev : t));
       const u = localStorage.getItem(CANDIDATE_USER_KEY);
-      setCandidate(u ? JSON.parse(u) : null);
+      setCandidate((prev) => {
+        const next = u ? JSON.parse(u) : null;
+        if (!prev && !next) return prev;
+        if (prev && next && prev.id === next.id && prev.email === next.email && prev.name === next.name) return prev;
+        return next;
+      });
     };
     window.addEventListener("candidate-auth-change", handleChange);
     return () => window.removeEventListener("candidate-auth-change", handleChange);

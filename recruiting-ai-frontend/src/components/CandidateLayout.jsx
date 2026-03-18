@@ -12,16 +12,16 @@ export function CandidateLayout({ children }) {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="sticky top-0 z-30 border-b border-gray-200 bg-white shadow-sm">
+    <div className="min-h-screen bg-white">
+      <header className="sticky top-0 z-30 border-b border-gray-800 bg-gray-900 shadow-sm">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <Link to="/candidate/jobs" className="text-lg font-semibold text-indigo-600">
+          <Link to="/candidate/jobs" className="text-lg font-semibold text-white hover:text-blue-200">
             Recruiting AI – Jobs
           </Link>
           <nav className="flex items-center gap-4">
             <Link
               to="/candidate/jobs"
-              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-200 hover:bg-white/5 hover:text-white"
             >
               <Briefcase className="h-4 w-4" />
               Job board
@@ -30,16 +30,16 @@ export function CandidateLayout({ children }) {
               <>
                 <Link
                   to="/candidate/dashboard"
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-200 hover:bg-white/5 hover:text-white"
                 >
                   <LayoutDashboard className="h-4 w-4" />
                   My applications
                 </Link>
-                <span className="text-sm text-gray-500">{candidate?.email}</span>
+                <span className="text-sm text-gray-300">{candidate?.email}</span>
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  className="flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium text-gray-200 hover:bg-white/5 hover:text-white"
                 >
                   <LogOut className="h-4 w-4" />
                   Logout
@@ -49,13 +49,13 @@ export function CandidateLayout({ children }) {
               <>
                 <Link
                   to="/candidate/login"
-                  className="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                  className="rounded-lg border border-white/15 bg-white/5 px-3 py-2 text-sm font-medium text-gray-200 hover:bg-white/10"
                 >
                   Sign in
                 </Link>
                 <Link
                   to="/candidate/signup"
-                  className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                  className="rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700"
                 >
                   Sign up
                 </Link>

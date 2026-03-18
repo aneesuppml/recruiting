@@ -92,7 +92,7 @@ export function useApplications(params = {}) {
   };
 
   useEffect(() => {
-    fetchApplications();
+    fetchApplications().catch(() => {});
   }, [fetchApplications]);
 
   return {

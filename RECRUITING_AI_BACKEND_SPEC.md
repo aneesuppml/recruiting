@@ -104,7 +104,7 @@ Support multiple companies using the platform.
 - POST /companies/:id/users
 - GET /companies/:id/users
 
-**Roles:** Admin, Recruiter, Interviewer
+**Roles:** Admin, Recruiter, Hiring Manager, Interviewer
 
 **Authorization (company users endpoints):**
 - **GET /companies/:id/users** and **POST /companies/:id/users** must be restricted to:
@@ -361,7 +361,7 @@ Generate seed data that populates realistic sample data for all models.
 
 **Seed structure:**
 - **Companies:** 3 companies (name, domain).
-- **Users:** Per company: 1 Admin, 2 Recruiters, 2 Interviewers (email, password, role, company_id). Password: `password123`.
+- **Users:** Per company: 1 Admin, 2 Recruiters, 1 Hiring Manager, 2 Interviewers (email, password, role, company_id). Password: `password123`.
 - **Jobs:** 5 jobs per company (title, description, status open/closed, department, location, company_id, created_by).
 - **Candidates:** 50 candidates (name, email, phone, resume_url, linkedin_url, status, ai_match_score).
 - **Applications:** Each candidate applies to 1–3 jobs (candidate_id, job_id, user_id, status, applied_at). Statuses: applied, screening, interview, rejected, hired.
@@ -372,4 +372,4 @@ Generate seed data that populates realistic sample data for all models.
 
 ---
 
-*Last updated: Candidate-side APIs (candidate auth, public jobs, candidate applications/dashboard); controllers CandidateAuthController and CandidateApplicationsController (no Candidate module to avoid model clash); Application/Interview/Job fields for candidates; AI job and email notifications. Profile and company users as before.*
+*Last updated: RBAC across backend via `Authorizable` (Admin/Recruiter/Hiring Manager/Interviewer), roles included in auth/profile JSON; Hiring Manager role seeded; interviewer scoping for interviews/feedback; candidate-side APIs and profile/company users as before.*

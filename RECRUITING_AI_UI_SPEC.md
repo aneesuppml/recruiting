@@ -55,11 +55,16 @@ Use a modern SaaS admin dashboard theme.
 - Status badges for pipeline stages
 - Charts for analytics
 
-**Color style suggestion:**
+**Color theme (current implementation):**
 
-- **Primary:** Indigo / Blue
-- **Secondary:** Gray
-- **Status colors:** Green → hired; Yellow → interview; Red → rejected; Blue → applied
+- **Blue** → primary actions, buttons, links, focus rings, active highlights
+- **White** → main background and cards
+- **Dark grey** → navbar + sidebar shell, headers, default text, borders
+
+**Look & feel:**
+- Modern SaaS dashboard layout
+- Soft shadows (`shadow-sm` / `shadow-lg`) and clean spacing
+- High contrast and readable typography
 
 **Use reusable UI components for:** Cards, Tables, Modals, Forms, Status badges, Charts.
 
@@ -113,6 +118,7 @@ Create reusable custom hooks for API logic. Hooks must encapsulate API calls so 
 - For endpoints that may return **403 Forbidden** (e.g. company users): do **not** rethrow after setting error state, so callers (e.g. `useEffect`) don’t get unhandled promise rejections.
 - For **login/signup** (recruiter and candidate): do **not** rethrow after setError; return null so the promise settles and the form shows the error without unhandled rejection.
 - Set a clear user-facing error message on 403 (e.g. “You don’t have permission to view users for this company. Only Admins and Recruiters can.”) and reset list data (e.g. empty array) as needed.
+- For hooks that auto-fetch on mount (e.g. `useDashboard`, `useJobs`, `useCandidates`, `useApplications`, `useInterviews`, `useCompanies`), ensure the `useEffect` call does not create unhandled promise rejections (e.g. `fetchX().catch(() => {})`) while still setting hook error state.
 
 ---
 
@@ -311,6 +317,9 @@ src/
 
 **Route protection:** `RoleProtectedRoute` wraps recruiter routes. If the current path requires a permission the user doesn’t have, redirect to the first allowed path (e.g. Interviewer without dashboard access is sent to /interviews). Default route "/" and "*" redirect authenticated users to their first allowed path (not always /dashboard).
 
+**Important edge case (localStorage sessions):**
+- If an older stored recruiter session exists without `user.roles`, the UI should avoid redirect loops. `RoleProtectedRoute` should skip RBAC redirects until roles are available; backend remains the source of truth.
+
 **Actions:** Hide or disable create/edit/delete buttons based on permissions (e.g. "Create job" only when `canManageJobs`; "Update status" on applications when `canUpdateApplication`; "Schedule interview" when `canManageInterviews`). Backend remains the source of truth and returns 403 for disallowed API calls.
 
 ---
@@ -338,6 +347,7 @@ Use React Router.
 - Graceful handling of 403 (and other API errors) with clear user messages and no unhandled rejections in hooks
 - **lucide-react** for all icons (Sidebar, Dashboard cards, FormModal close, etc.); no emoji icons
 - **RBAC:** Sidebar and routes restricted by role; create/edit/delete actions hidden when user lacks permission; roles from login/profile
+- **Theme:** Consistent blue/white/dark-grey styling across navbar, sidebar, buttons, cards, tables, and forms
 
 ---
 
@@ -362,4 +372,4 @@ Design the UI similar to a modern ATS recruiting dashboard used by recruiting te
 
 ---
 
-*Last updated: Candidate-facing UI (CandidateAuthContext, candidateApi, JobBoard, JobDetails, ApplyJob, CandidateDashboard, ApplicationStatus, CandidateLayout, CandidateProtectedRoute); useCandidateAuth/usePublicJobs/useCandidateApplications; recruiter login/signup and candidate signup/login must not rethrow (avoid unhandled rejection); api interceptor only clears token on 401 when request was not to /login or /signup. Navbar, Profile, lucide-react as before. Update this spec when new UI requirements are given.*
+*Last updated: RBAC UI (permissions + sidebar filtering + `RoleProtectedRoute` redirects), blue/white/dark-grey theme applied across shared components/pages, improved hook error handling to avoid unhandled rejections, and candidate UI as before.*

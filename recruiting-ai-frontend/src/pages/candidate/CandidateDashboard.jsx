@@ -12,7 +12,7 @@ export function CandidateDashboard() {
   }, [fetchMyApplications]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
       <div className="mx-auto max-w-4xl px-4 py-8">
         <h1 className="text-2xl font-semibold text-gray-900">My applications</h1>
         <p className="mt-1 text-sm text-gray-500">Track the status of your job applications.</p>
@@ -23,7 +23,7 @@ export function CandidateDashboard() {
 
         {loading ? (
           <div className="mt-8 flex justify-center">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+            <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
           </div>
         ) : (
           <ul className="mt-8 space-y-4">
@@ -33,7 +33,7 @@ export function CandidateDashboard() {
                 <p className="mt-4 text-gray-500">You haven’t applied to any jobs yet.</p>
                 <Link
                   to="/candidate/jobs"
-                  className="mt-4 inline-block rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                  className="mt-4 inline-block rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
                 >
                   Browse jobs
                 </Link>
@@ -43,7 +43,7 @@ export function CandidateDashboard() {
                 <li key={app.id}>
                   <Link
                     to={`/candidate/applications/${app.id}`}
-                    className="block rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:border-indigo-200"
+                    className="block rounded-xl border border-gray-200 bg-white p-5 shadow-sm hover:border-blue-200"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div>

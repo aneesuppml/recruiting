@@ -1,6 +1,6 @@
 export function DashboardCard({ title, value, subtitle, icon, trend }) {
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+    <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-gray-500">{title}</p>
@@ -12,7 +12,11 @@ export function DashboardCard({ title, value, subtitle, icon, trend }) {
             </p>
           )}
         </div>
-        {icon && <div className="flex h-9 w-9 items-center justify-center text-gray-500 [&_svg]:h-7 [&_svg]:w-7">{icon}</div>}
+        {icon && (
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gray-50 text-blue-700 ring-1 ring-inset ring-gray-200 [&_svg]:h-7 [&_svg]:w-7">
+            {icon}
+          </div>
+        )}
       </div>
     </div>
   );

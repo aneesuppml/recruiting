@@ -33,7 +33,7 @@ export function Sidebar() {
   const allowed = navItems.filter((item) => permissions[item.permission]);
 
   return (
-    <aside className="fixed left-0 top-14 z-20 h-[calc(100vh-3.5rem)] w-56 border-r border-gray-200 bg-white">
+    <aside className="fixed left-0 top-14 z-20 h-[calc(100vh-3.5rem)] w-56 border-r border-gray-800 bg-gray-900">
       <nav className="flex flex-col gap-1 p-3">
         {allowed.map(({ to, label, Icon }) => (
           <NavLink
@@ -41,7 +41,9 @@ export function Sidebar() {
             to={to}
             className={({ isActive }) =>
               `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                isActive ? "bg-indigo-50 text-indigo-700" : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                isActive
+                  ? "bg-blue-600/15 text-blue-200 ring-1 ring-inset ring-blue-500/30"
+                  : "text-gray-300 hover:bg-white/5 hover:text-white"
               }`
             }
           >

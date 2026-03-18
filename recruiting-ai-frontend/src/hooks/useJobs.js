@@ -101,7 +101,7 @@ export function useJobs(params = {}) {
   };
 
   useEffect(() => {
-    fetchJobs();
+    fetchJobs().catch(() => {});
   }, [fetchJobs]);
 
   return {

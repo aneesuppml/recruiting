@@ -59,7 +59,7 @@ export function Interviews() {
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700"
           >
             Schedule interview
           </button>
@@ -68,7 +68,7 @@ export function Interviews() {
       {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {loading && !interviews.length ? (
         <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
         </div>
       ) : (
         <DataTable columns={columns} data={interviews} emptyMessage="No interviews scheduled." />
@@ -81,7 +81,7 @@ export function Interviews() {
               value={form.application_id}
               onChange={(e) => setForm((f) => ({ ...f, application_id: e.target.value }))}
               required
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="">Select application</option>
               {applications.map((a) => (
@@ -96,7 +96,7 @@ export function Interviews() {
             <select
               value={form.round_type}
               onChange={(e) => setForm((f) => ({ ...f, round_type: e.target.value }))}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               {ROUND_TYPES.map((r) => (
                 <option key={r} value={r}>
@@ -112,7 +112,7 @@ export function Interviews() {
               value={form.interviewer_id}
               onChange={(e) => setForm((f) => ({ ...f, interviewer_id: e.target.value }))}
               placeholder="Optional"
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -121,7 +121,7 @@ export function Interviews() {
               type="datetime-local"
               value={form.scheduled_at}
               onChange={(e) => setForm((f) => ({ ...f, scheduled_at: e.target.value ? new Date(e.target.value).toISOString() : "" }))}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -129,7 +129,7 @@ export function Interviews() {
             <select
               value={form.status}
               onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               {STATUSES.map((s) => (
                 <option key={s} value={s}>
@@ -139,10 +139,10 @@ export function Interviews() {
             </select>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setModalOpen(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50">
+            <button type="button" onClick={() => setModalOpen(false)} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700">
+            <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">
               Schedule
             </button>
           </div>

@@ -55,7 +55,7 @@ export function Candidates() {
       label: "Resume",
       render: (row) =>
         row.resume_url ? (
-          <a href={row.resume_url} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+          <a href={row.resume_url} target="_blank" rel="noopener noreferrer" className="text-blue-700 hover:underline">
             Link
           </a>
         ) : (
@@ -74,7 +74,7 @@ export function Candidates() {
             key: "actions",
             label: "Actions",
             render: (row) => (
-              <button type="button" onClick={() => openEdit(row)} className="text-indigo-600 hover:underline">
+              <button type="button" onClick={() => openEdit(row)} className="text-blue-700 hover:underline">
                 Edit
               </button>
             ),
@@ -88,7 +88,7 @@ export function Candidates() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Candidates</h1>
         {canManageCandidates && (
-          <button type="button" onClick={openCreate} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+          <button type="button" onClick={openCreate} className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">
             Add candidate
           </button>
         )}
@@ -96,7 +96,7 @@ export function Candidates() {
       {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {loading && !candidates.length ? (
         <div className="flex justify-center py-12">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
         </div>
       ) : (
         <DataTable columns={columns} data={candidates} emptyMessage="No candidates yet." />
@@ -110,7 +110,7 @@ export function Candidates() {
               value={form.name}
               onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
               required
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -120,7 +120,7 @@ export function Candidates() {
               value={form.email}
               onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
               required
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -129,7 +129,7 @@ export function Candidates() {
               type="text"
               value={form.phone}
               onChange={(e) => setForm((f) => ({ ...f, phone: e.target.value }))}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -138,7 +138,7 @@ export function Candidates() {
               type="url"
               value={form.resume_url}
               onChange={(e) => setForm((f) => ({ ...f, resume_url: e.target.value }))}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
@@ -147,12 +147,16 @@ export function Candidates() {
               type="url"
               value={form.linkedin_url}
               onChange={(e) => setForm((f) => ({ ...f, linkedin_url: e.target.value }))}
-              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2"
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700">Status</label>
-            <select value={form.status} onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))} className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2">
+            <select
+              value={form.status}
+              onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+              className="mt-1 block w-full rounded-lg border border-gray-300 px-3 py-2 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            >
               <option value="new">New</option>
               <option value="screening">Screening</option>
               <option value="interview">Interview</option>
@@ -162,10 +166,10 @@ export function Candidates() {
             </select>
           </div>
           <div className="flex justify-end gap-2">
-            <button type="button" onClick={() => setModalOpen(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50">
+            <button type="button" onClick={() => setModalOpen(false)} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm hover:bg-gray-50">
               Cancel
             </button>
-            <button type="submit" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700">
+            <button type="submit" className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700">
               {editing ? "Update" : "Create"}
             </button>
           </div>

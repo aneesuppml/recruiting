@@ -7,7 +7,7 @@ export function Reports() {
   if (loading && !summary) {
     return (
       <div className="flex items-center justify-center p-12">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-indigo-600 border-t-transparent" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
       </div>
     );
   }
@@ -37,7 +37,7 @@ export function Reports() {
               {Object.entries(pipeline.pipeline).map(([status, count]) => (
                 <li key={status} className="flex items-center justify-between border-b border-gray-100 pb-2">
                   <span className="capitalize text-gray-700">{status}</span>
-                  <span className="font-semibold text-indigo-600">{count}</span>
+                  <span className="font-semibold text-blue-700">{count}</span>
                 </li>
               ))}
             </ul>

@@ -87,7 +87,7 @@ export function useInterviews(params = {}) {
   };
 
   useEffect(() => {
-    fetchInterviews();
+    fetchInterviews().catch(() => {});
   }, [fetchInterviews]);
 
   return {

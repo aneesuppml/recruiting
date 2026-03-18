@@ -13,6 +13,9 @@ export function RoleProtectedRoute({ children }) {
   const requiredPermission = getRequiredPermissionForPath(path);
 
   if (!user) return children; // Let ProtectedRoute handle unauthenticated
+  // If roles aren't present yet (e.g. older localStorage session), avoid redirect loops.
+  // Backend still enforces RBAC; UI gating becomes active once roles are available.
+  if (!Array.isArray(user.roles)) return children;
 
   const permissions = getPermissions(user);
   if (requiredPermission == null) return children;
