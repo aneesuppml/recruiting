@@ -5,11 +5,13 @@ import { CandidateAuthProvider } from "./context/CandidateAuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RoleProtectedRoute } from "./components/RoleProtectedRoute";
 import { CandidateProtectedRoute } from "./components/CandidateProtectedRoute";
+import { PendingCompanyRoute } from "./components/PendingCompanyRoute";
 import { Navbar } from "./components/Navbar";
 import { Sidebar } from "./components/Sidebar";
 import { CandidateLayout } from "./components/CandidateLayout";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { PendingApproval } from "./pages/PendingApproval";
 import { Dashboard } from "./pages/Dashboard";
 import { Companies } from "./pages/Companies";
 import { Users } from "./pages/Users";
@@ -143,12 +145,24 @@ export default function App() {
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
           <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
           <Route
+            path="/pending-approval"
+            element={
+              <ProtectedRoute>
+                <PendingCompanyRoute>
+                  <Layout><PendingApproval /></Layout>
+                </PendingCompanyRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Dashboard /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Dashboard /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -156,9 +170,11 @@ export default function App() {
             path="/companies"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Companies /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Companies /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -166,9 +182,11 @@ export default function App() {
             path="/users"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Users /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Users /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -176,9 +194,11 @@ export default function App() {
             path="/jobs"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Jobs /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Jobs /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -186,9 +206,11 @@ export default function App() {
             path="/candidates"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Candidates /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Candidates /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -196,9 +218,11 @@ export default function App() {
             path="/applications"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Applications /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Applications /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -206,9 +230,11 @@ export default function App() {
             path="/interviews"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Interviews /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Interviews /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -216,9 +242,11 @@ export default function App() {
             path="/feedback"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Feedback /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Feedback /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -226,9 +254,11 @@ export default function App() {
             path="/reports"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Reports /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Reports /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -236,9 +266,11 @@ export default function App() {
             path="/settings"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Settings /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Settings /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />
@@ -246,9 +278,11 @@ export default function App() {
             path="/settings/profile"
             element={
               <ProtectedRoute>
-                <RoleProtectedRoute>
-                  <Layout><Profile /></Layout>
-                </RoleProtectedRoute>
+                <PendingCompanyRoute>
+                  <RoleProtectedRoute>
+                    <Layout><Profile /></Layout>
+                  </RoleProtectedRoute>
+                </PendingCompanyRoute>
               </ProtectedRoute>
             }
           />

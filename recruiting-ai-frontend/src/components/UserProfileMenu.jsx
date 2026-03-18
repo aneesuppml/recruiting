@@ -83,14 +83,27 @@ export function UserProfileMenu() {
           >
             Profile
           </button>
-          <button
-            type="button"
-            onClick={() => handleNav("/settings")}
-            className="w-full px-3 py-2 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
-            role="menuitem"
-          >
-            Settings
-          </button>
+
+          {user.company_status === "pending" ? (
+            <button
+              type="button"
+              onClick={() => handleNav("/pending-approval")}
+              className="w-full px-3 py-2 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
+              role="menuitem"
+            >
+              Company Status
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => handleNav("/settings")}
+              className="w-full px-3 py-2 text-left text-sm font-medium text-gray-800 hover:bg-gray-50"
+              role="menuitem"
+            >
+              Settings
+            </button>
+          )}
+
           <button
             type="button"
             onClick={handleLogout}

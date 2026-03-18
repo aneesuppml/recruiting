@@ -64,6 +64,8 @@ src/
 
 - **Auth**: recruiter login/signup, JWT stored in localStorage, logout
 - **RBAC UI**: sidebar + route access are filtered by `user.roles` (backend remains source of truth)
+- **Company verification (pending tenants)**: users can log in while `company_status=pending`, but the UI restricts access to only Profile and the company verification page.
+- **Pending page:** `/pending-approval` (fetches company + admin details from `GET /company/status`)
 - **Dashboard & reports**: summary, pipeline, analytics
 - **Companies**: list/create (Admin-only for create)
 - **Users**: view/invite users (Admin/Recruiter)
@@ -87,3 +89,11 @@ src/
 
 - If you see API errors like “API unreachable…”, ensure the Rails API is running and `VITE_API_URL` matches its port.
 - Specs live in the repo root: `RECRUITING_AI_UI_SPEC.md` and `RECRUITING_AI_BACKEND_SPEC.md`.
+
+## Pending tenant navigation
+
+- After successful login, the app redirects based on `user.company_status`:
+  - `active` → `/dashboard`
+  - `pending` → `/pending-approval`
+- While pending, navigation/sidebar and route guards prevent access to main modules (Jobs, Candidates, Applications, Interviews, Feedback, Reports, Companies, Users, Settings hub).
+- Logout works normally via the profile dropdown.

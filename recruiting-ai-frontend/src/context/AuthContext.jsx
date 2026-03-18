@@ -33,7 +33,15 @@ export function AuthProvider({ children }) {
         const next = u ? JSON.parse(u) : null;
         // Avoid needless state updates that can cause render loops
         if (!prev && !next) return prev;
-        if (prev && next && prev.id === next.id && prev.email === next.email && prev.name === next.name && prev.company_id === next.company_id) {
+        if (
+          prev &&
+          next &&
+          prev.id === next.id &&
+          prev.email === next.email &&
+          prev.name === next.name &&
+          prev.company_id === next.company_id &&
+          prev.company_status === next.company_status
+        ) {
           // roles may be present; compare shallowly if both have roles arrays
           const prevRoles = Array.isArray(prev.roles) ? prev.roles.join("|") : "";
           const nextRoles = Array.isArray(next.roles) ? next.roles.join("|") : "";

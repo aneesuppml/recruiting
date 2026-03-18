@@ -103,6 +103,8 @@ export function getRequiredPermissionForPath(path) {
 
 /** First path the user is allowed to see (for default redirect when they lack dashboard). */
 export function getDefaultPathForUser(user) {
+  if (user?.company_status === "pending") return "/pending-approval";
+
   const perms = getPermissions(user);
   if (perms.canAccessSuperAdmin) return "/super-admin/companies";
   if (perms.canViewDashboard) return "/dashboard";
@@ -115,7 +117,8 @@ export function getDefaultPathForUser(user) {
   if (perms.canManageFeedback) return "/feedback";
   if (perms.canViewReports) return "/reports";
   if (perms.canViewSettings) return "/settings";
-  return "/dashboard";
+  // Safe fallback (doesn't require a specific permission)
+  return "/settings/profile";
 }
 
 export { ROLES };

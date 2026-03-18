@@ -62,6 +62,23 @@ All endpoints return JSON. Recruiter/internal endpoints require `Authorization: 
 
 Responses include `user` and `token`. `user.roles` is returned for RBAC.
 
+#### Company verification (pending tenants)
+
+`POST /signup` creates a new tenant `Company` in `pending` status and associates the registering user to it.
+
+- Registration now accepts a `user` payload containing:
+  - Admin user details: `name`, `email`, `password`, `password_confirmation`
+  - Company details (tenant onboarding): `company_name`, required unique `domain`, optional `company_size`, optional `industry`
+  - Address: `address_line1`, optional `address_line2`, `city`, `state`, `country`, `postal_code`
+  - Contact: `contact_email`, `contact_phone`
+- On successful signup the API returns `pending: true` (no active session token).
+- `POST /login` behavior:
+  - Allowed: company status `pending`
+  - Blocked: company status `rejected` (403)
+- While authenticated and the company is `pending` or `rejected`, restricted API access is enforced:
+  - Allowed: `GET /profile`, `GET /company/status`
+  - Everything else returns `403` with a clear error (e.g. `Company Pending Approval`)
+
 ### Companies & users
 
 - `GET /companies`
@@ -69,6 +86,11 @@ Responses include `user` and `token`. `user.roles` is returned for RBAC.
 - `POST /companies`
 - `GET /companies/:company_id/users`
 - `POST /companies/:company_id/users`
+
+#### Company status (authenticated)
+
+- `GET /company/status`  
+  Returns the current company details (including pending address/contact info) and the admin user (name/email) for the pending UI.
 
 ### Jobs
 
@@ -145,6 +167,13 @@ RBAC is enforced server-side for all protected endpoints (403 on forbidden actio
 - **Recruiter**: manage jobs/candidates/applications, schedule interviews, manage company users
 - **Hiring Manager**: view jobs/candidates/applications, participate in interview decisions/feedback
 - **Interviewer**: view only assigned interviews, submit feedback, limited access
+
+### Company verification gating (pending tenants)
+
+- When `current_user.company.status` is `pending` or `rejected`, the backend blocks all restricted endpoints and returns `403 Forbidden` with a JSON error.
+- Pending/rejected users can still access:
+  - `GET /profile`
+  - `GET /company/status`
 
 ### Candidates
 

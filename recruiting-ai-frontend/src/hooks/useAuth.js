@@ -9,15 +9,59 @@ export function useAuth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const signup = async (email, password, passwordConfirmation) => {
+  const signup = async (payload) => {
     setLoading(true);
     setError(null);
     try {
+      const {
+        name,
+        email,
+        password,
+        passwordConfirmation,
+        company_name,
+        domain,
+        company_size,
+        industry,
+        address_line1,
+        address_line2,
+        city,
+        state,
+        country,
+        postal_code,
+        contact_email,
+        contact_phone,
+      } = payload || {};
+
       const { data } = await api.post("/signup", {
-        user: { email, password, password_confirmation: passwordConfirmation },
+        user: {
+          name,
+          email,
+          password,
+          password_confirmation: passwordConfirmation,
+          company_name,
+          domain,
+          company_size,
+          industry,
+          address_line1,
+          address_line2,
+          city,
+          state,
+          country,
+          postal_code,
+          contact_email,
+          contact_phone,
+        },
       });
-      setAuth(data.user, data.token);
-      navigate("/dashboard");
+
+      if (data?.token) {
+        setAuth(data.user, data.token);
+        const dest = data?.user?.company_status === "pending" ? "/pending-approval" : "/dashboard";
+        navigate(dest);
+      } else if (data?.pending) {
+        navigate("/pending-approval");
+      } else {
+        navigate("/login");
+      }
       return data;
     } catch (err) {
       const msg = err.response?.data?.errors?.join?.(" ") || err.response?.data?.error || "Signup failed";
@@ -36,10 +80,17 @@ export function useAuth() {
         user: { email, password },
       });
       setAuth(data.user, data.token);
-      navigate("/dashboard");
+      const dest = data?.user?.company_status === "pending" ? "/pending-approval" : "/dashboard";
+      navigate(dest);
       return data;
     } catch (err) {
-      const msg = err.response?.data?.error || "Invalid email or password";
+      const apiError = err.response?.data?.error;
+      if (apiError === "Account Pending Approval") {
+        navigate("/pending-approval");
+        return null;
+      }
+
+      const msg = apiError || "Invalid email or password";
       setError(msg);
       return null;
     } finally {

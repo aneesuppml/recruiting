@@ -24,6 +24,9 @@ Rails.application.routes.draw do
   get "profile", to: "profiles#show"
   patch "profile", to: "profiles#update"
 
+  # Company onboarding status (authenticated)
+  get "company/status", to: "companies#status"
+
   # Companies & company users
   resources :companies, only: %i[index show create update] do
     resources :users, only: %i[index create], controller: "company_users"

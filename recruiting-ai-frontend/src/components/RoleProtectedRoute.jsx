@@ -22,5 +22,6 @@ export function RoleProtectedRoute({ children }) {
   if (permissions[requiredPermission]) return children;
 
   const defaultPath = getDefaultPathForUser(user);
+  if (defaultPath === path) return children;
   return <Navigate to={defaultPath} replace state={{ from: location, forbidden: true }} />;
 }

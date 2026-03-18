@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_03_18_000001) do
+ActiveRecord::Schema[7.2].define(version: 2026_03_18_000002) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -58,7 +58,20 @@ ActiveRecord::Schema[7.2].define(version: 2026_03_18_000001) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "active", default: true, null: false
+    t.string "status", default: "active", null: false
+    t.string "company_size"
+    t.string "industry"
+    t.string "address_line1"
+    t.string "address_line2"
+    t.string "city"
+    t.string "state"
+    t.string "country"
+    t.string "postal_code"
+    t.string "contact_email"
+    t.string "contact_phone"
     t.index ["active"], name: "index_companies_on_active"
+    t.index ["domain"], name: "index_companies_on_domain", unique: true
+    t.index ["status"], name: "index_companies_on_status"
   end
 
   create_table "feedbacks", force: :cascade do |t|

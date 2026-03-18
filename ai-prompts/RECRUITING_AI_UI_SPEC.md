@@ -218,9 +218,45 @@ Super Admin uses a separate layout and header:
 
 **APIs:** POST /signup, POST /login
 
-**On login:** store JWT token in localStorage, update auth context, redirect to dashboard.
+**Register (company onboarding):**
+- Register.jsx collects both:
+  - **Company Details**: `company_name`, required unique `domain`, optional `company_size`, optional `industry`, full address (`address_line1`, optional `address_line2`, `city`, `state`, `country`, `postal_code`), and contact info (`contact_email`, `contact_phone`)
+  - **Admin User Details**: `name`, `email`, `password`, `password_confirmation`
+- After `POST /signup`, the backend creates a tenant `Company` in `pending` status and assigns the registering user the **Admin** role.
+
+**On login:** store JWT token in localStorage, update auth context, then redirect to:
+- `/dashboard` when the user’s `company_status` is `active`
+- `/pending-approval` when the user’s `company_status` is `pending`
 
 **Recruiter login/signup errors:** useAuth must not rethrow on failure; set error message and return so the form shows “Invalid email or password” (or API message) without unhandled rejection.
+
+---
+
+## Company Verification (Pending Tenants)
+
+New tenant onboarding behavior:
+- Users can log in even when their company `status` is `pending`
+- While pending, the UI must restrict access to only:
+  - **Profile** (`/settings/profile`)
+  - **Company verification/status** (`/pending-approval`)
+  - Logout
+- All other main modules (Jobs, Candidates, Applications, Interviews, Feedback, Reports, Companies, Users, Settings hub) must be hidden/disabled via navigation guards and sidebar gating.
+
+**Pending page:** `/pending-approval`
+- Render inside the normal app shell (Navbar + Sidebar)
+- Fetch company + admin details from `GET /company/status`
+- Display:
+  - company name and domain
+  - full address + contact info
+  - status: show **Pending Approval** when `status=pending`
+  - message: “Your company is under verification. Access will be granted once approved.”
+
+**Frontend route guards:**
+- `PendingCompanyRoute` (used inside `ProtectedRoute`) redirects pending tenants away from restricted routes to `/pending-approval`
+- Sidebar and profile dropdown must only show the allowed items for pending tenants
+
+**API errors while pending:**
+- If a pending tenant calls a restricted API, the backend returns `403 Forbidden` with a clear error (e.g. “Company Pending Approval”)
 
 ---
 
@@ -373,7 +409,7 @@ Super Admin uses a separate layout and header:
 
 Use React Router.
 
-**Routes (recruiter):** /login, /register, /dashboard, /companies, /users, /jobs, /candidates, /applications, /interviews, /feedback, /reports, /settings, /settings/profile
+**Routes (recruiter):** /login, /register, /pending-approval, /dashboard, /companies, /users, /jobs, /candidates, /applications, /interviews, /feedback, /reports, /settings, /settings/profile
 
 **Routes (candidate):** /candidate/jobs, /candidate/jobs/:id, /candidate/login, /candidate/signup, /candidate/dashboard, /candidate/applications/:id, /candidate/apply/:jobId
 
@@ -417,4 +453,4 @@ Design the UI similar to a modern ATS recruiting dashboard used by recruiting te
 
 ---
 
-*Last updated: Super Admin module (routes, layout, companies/users/analytics pages, header profile dropdown + /super-admin/profile); RBAC UI (permissions + `RoleProtectedRoute` + `SuperAdminRoute`), blue/white/dark-grey theme, improved hook error handling, and candidate UI as before.*
+*Last updated: Super Admin module (routes, layout, companies/users/analytics pages, header profile dropdown + /super-admin/profile); RBAC UI (permissions + `RoleProtectedRoute` + `SuperAdminRoute`); company onboarding verification for pending tenants (`/pending-approval` page, `PendingCompanyRoute`, Navbar/Sidebar gating, and `GET /company/status`); blue/white/dark-grey theme, improved hook error handling, and candidate UI as before.*

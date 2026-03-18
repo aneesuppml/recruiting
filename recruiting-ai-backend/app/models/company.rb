@@ -6,4 +6,6 @@ class Company < ApplicationRecord
   has_many :candidates, dependent: :destroy
 
   validates :name, presence: true
+  validates :domain, presence: true, uniqueness: true
+  validates :status, presence: true, inclusion: { in: %w[pending active rejected] }
 end

@@ -14,7 +14,7 @@ export function Users() {
   const [role, setRole] = useState("Recruiter");
 
   useEffect(() => {
-    fetchCompanies();
+    fetchCompanies().catch(() => {});
   }, [fetchCompanies]);
 
   useEffect(() => {
@@ -22,7 +22,7 @@ export function Users() {
   }, [user?.company_id, selectedCompanyId]);
 
   useEffect(() => {
-    if (selectedCompanyId) fetchCompanyUsers(selectedCompanyId);
+    if (selectedCompanyId) fetchCompanyUsers(selectedCompanyId).catch?.(() => {});
   }, [selectedCompanyId, fetchCompanyUsers]);
 
   const handleInvite = async (e) => {

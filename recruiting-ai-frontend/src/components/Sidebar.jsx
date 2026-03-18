@@ -12,6 +12,7 @@ import {
   Settings,
 } from "lucide-react";
 import { usePermissions } from "../hooks/usePermissions";
+import { useAuthContext } from "../context/AuthContext";
 
 const iconClass = "h-5 w-5 shrink-0";
 
@@ -30,7 +31,44 @@ const navItems = [
 
 export function Sidebar() {
   const permissions = usePermissions();
+  const { user } = useAuthContext();
   if (permissions.isSuperAdmin) return null;
+
+  if (user?.company_status === "pending") {
+    return (
+      <aside className="fixed left-0 top-14 z-20 h-[calc(100vh-3.5rem)] w-56 border-r border-gray-800 bg-gray-900">
+        <nav className="flex flex-col gap-1 p-3">
+          <NavLink
+            to="/pending-approval"
+            className={({ isActive }) =>
+              `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-blue-600/15 text-blue-200 ring-1 ring-inset ring-blue-500/30"
+                  : "text-gray-300 hover:bg-white/5 hover:text-white"
+              }`
+            }
+          >
+            <Building2 className={iconClass} aria-hidden />
+            Company Status
+          </NavLink>
+          <NavLink
+            to="/settings/profile"
+            className={({ isActive }) =>
+              `flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                isActive
+                  ? "bg-blue-600/15 text-blue-200 ring-1 ring-inset ring-blue-500/30"
+                  : "text-gray-300 hover:bg-white/5 hover:text-white"
+              }`
+            }
+          >
+            <Settings className={iconClass} aria-hidden />
+            Profile
+          </NavLink>
+        </nav>
+      </aside>
+    );
+  }
+
   const allowed = navItems.filter((item) => permissions[item.permission]);
 
   return (

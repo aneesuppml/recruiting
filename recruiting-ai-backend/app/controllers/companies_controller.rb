@@ -11,6 +11,39 @@ class CompaniesController < ApplicationController
   before_action :require_can_create_company!, only: %i[create]
   before_action :require_can_update_company!, only: %i[update]
 
+  def status
+    company = current_user.company
+    unless company
+      render json: { error: "Company context required" }, status: :forbidden
+      return
+    end
+
+    render json: {
+      company: company.as_json(
+        only: [
+          :id,
+          :name,
+          :domain,
+          :company_size,
+          :industry,
+          :address_line1,
+          :address_line2,
+          :city,
+          :state,
+          :country,
+          :postal_code,
+          :contact_email,
+          :contact_phone,
+          :status,
+          :active,
+          :created_at,
+          :updated_at
+        ]
+      ),
+      admin_user: { name: current_user.name, email: current_user.email }
+    }
+  end
+
   def index
     companies = current_user.super_admin? ? Company.all : (current_user.admin? ? Company.all : Company.where(id: current_user.company_id))
     render json: companies

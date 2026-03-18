@@ -117,6 +117,41 @@ Support multiple companies using the platform.
 
 ---
 
+## Company Verification (Pending Tenants)
+
+To support multi-tenant onboarding with approval:
+- **Company** has a `status` field: `pending | active | rejected`
+- **POST /signup** must create:
+  - a new tenant `Company` with `status: "pending"`
+  - the registering user associated to that company
+  - assign the registering user the **Admin** role (no separate Owner role)
+- Company onboarding fields on signup (must be persisted on `Company`):
+  - required unique `domain`
+  - address fields (`address_line1`, optional `address_line2`, `city`, `state`, `country`, `postal_code`)
+  - contact fields (`contact_email`, `contact_phone`)
+  - optional `company_size`, optional `industry`
+
+### Login behavior
+- `POST /login` must allow users whose company status is `pending`
+- Users whose company status is `rejected` must not be able to log in
+
+### Restricted API access while pending
+- For authenticated API requests, if `current_user.company.status` is `pending` (or `rejected`):
+  - allow only:
+    - `GET /profile`
+    - `GET /company/status`
+  - all other endpoints should return `403 Forbidden` with a JSON error such as:
+    - `{ "error": "Company Pending Approval" }`
+
+### Company status endpoint (authenticated)
+- Add `GET /company/status` (current user context) returning:
+  - company fields required by the pending UI:
+    - company name, domain, address, contact, size/industry, status, created_at
+  - admin user details for that company:
+    - name and email
+
+---
+
 ## Step 3 — Job Management Module
 
 **Generate:**

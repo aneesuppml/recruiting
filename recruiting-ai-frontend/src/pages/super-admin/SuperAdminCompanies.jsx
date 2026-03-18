@@ -8,6 +8,8 @@ export function SuperAdminCompanies() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({ name: "", domain: "", active: true });
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [detailsCompany, setDetailsCompany] = useState(null);
 
   const openCreate = () => {
     setEditing(null);
@@ -23,6 +25,11 @@ export function SuperAdminCompanies() {
       active: company.active !== false,
     });
     setModalOpen(true);
+  };
+
+  const openDetails = (company) => {
+    setDetailsCompany(company);
+    setDetailsOpen(true);
   };
 
   const handleSubmit = async (e) => {
@@ -43,14 +50,47 @@ export function SuperAdminCompanies() {
     { key: "id", label: "ID" },
     { key: "name", label: "Name" },
     { key: "domain", label: "Domain" },
-    { key: "active", label: "Status", render: (row) => (row.active === false ? "Inactive" : "Active") },
+    {
+      key: "status",
+      label: "Status",
+      render: (row) => {
+        if (row.status) {
+          const s = String(row.status);
+          return s.charAt(0).toUpperCase() + s.slice(1);
+        }
+        return row.active === false ? "Inactive" : "Active";
+      },
+    },
     {
       key: "actions",
       label: "Actions",
       render: (row) => (
-        <button type="button" onClick={() => openEdit(row)} className="text-blue-700 hover:underline">
-          Edit
-        </button>
+        <div className="flex items-center gap-3">
+          <button type="button" onClick={() => openEdit(row)} className="text-blue-700 hover:underline">
+            Edit
+          </button>
+          <button type="button" onClick={() => openDetails(row)} className="text-blue-700 hover:underline">
+            Details
+          </button>
+          {(row.status === "pending" || row.status === "rejected") && (
+            <button
+              type="button"
+              onClick={() => updateCompany(row.id, { status: "active" })}
+              className="rounded-lg bg-blue-600 px-3 py-1 text-xs font-medium text-white shadow-sm hover:bg-blue-700"
+            >
+              Approve
+            </button>
+          )}
+          {row.status === "pending" && (
+            <button
+              type="button"
+              onClick={() => updateCompany(row.id, { status: "rejected" })}
+              className="rounded-lg bg-gray-100 px-3 py-1 text-xs font-medium text-gray-800 shadow-sm hover:bg-gray-200"
+            >
+              Reject
+            </button>
+          )}
+        </div>
       ),
     },
   ]), []);
@@ -129,6 +169,84 @@ export function SuperAdminCompanies() {
             </button>
           </div>
         </form>
+      </FormModal>
+
+      <FormModal
+        open={detailsOpen}
+        onClose={() => {
+          setDetailsOpen(false);
+          setDetailsCompany(null);
+        }}
+        title="Company Details"
+      >
+        {detailsCompany && (
+          <div className="space-y-5">
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Company</h3>
+              <div className="mt-3 space-y-2 text-sm text-gray-700">
+                <div>
+                  <span className="font-medium text-gray-900">Company name:</span> {detailsCompany.name}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-900">Domain:</span> {detailsCompany.domain}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-900">Status:</span> {detailsCompany.status}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-900">Created at:</span> {detailsCompany.created_at ? String(detailsCompany.created_at) : "-"}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-900">Company size:</span> {detailsCompany.company_size || "-"}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-900">Industry:</span> {detailsCompany.industry || "-"}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Address</h3>
+              <div className="mt-3 space-y-2 text-sm text-gray-700">
+                <div>{detailsCompany.address_line1 || "-"}</div>
+                {detailsCompany.address_line2 ? <div>{detailsCompany.address_line2}</div> : null}
+                <div>
+                  {detailsCompany.city || "-"},{" "}
+                  {detailsCompany.state || "-"},{" "}
+                  {detailsCompany.country || "-"} {detailsCompany.postal_code || ""}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-gray-900">Contact</h3>
+              <div className="mt-3 space-y-2 text-sm text-gray-700">
+                <div>
+                  <span className="font-medium text-gray-900">Email:</span> {detailsCompany.contact_email || "-"}
+                </div>
+                <div>
+                  <span className="font-medium text-gray-900">Phone:</span> {detailsCompany.contact_phone || "-"}
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <h3 className="text-sm font-semibold text-gray-900">Admin User</h3>
+              {detailsCompany.admin_user ? (
+                <div className="mt-3 space-y-2 text-sm text-gray-700">
+                  <div>
+                    <span className="font-medium text-gray-900">Name:</span> {detailsCompany.admin_user.name}
+                  </div>
+                  <div>
+                    <span className="font-medium text-gray-900">Email:</span> {detailsCompany.admin_user.email}
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 text-sm text-gray-600">No admin user found.</div>
+              )}
+            </div>
+          </div>
+        )}
       </FormModal>
     </div>
   );
