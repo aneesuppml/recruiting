@@ -1,0 +1,2582 @@
+openapi: 3.0.3
+info:
+  title: Recruiting-AI Backend API
+  version: "1.0.0"
+  description: >
+    OpenAPI (Swagger) documentation for the current `recruiting-ai-backend` Rails API.
+    Recruiter/internal users authenticate with a JWT in the `Authorization` header.
+    Candidate job board + candidate application endpoints use a candidate JWT in the same header.
+
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: Auth
+  - name: Company
+  - name: Jobs
+  - name: Candidates
+  - name: Applications
+  - name: Interviews
+  - name: Feedback
+  - name: Dashboard
+  - name: CandidatePublic
+  - name: Candidate
+  - name: SuperAdmin
+
+components:
+  securitySchemes:
+    RecruiterJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Recruiter/internal JWT token (Authorization: Bearer <token>)"
+    CandidateJWT:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: "Candidate JWT token (Authorization: Bearer <token>)"
+    XCompanyID:
+      type: apiKey
+      in: header
+      name: X-Company-ID
+      description: Active tenant/company context for multi-company admin users.
+
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      additionalProperties: true
+
+    RolesArray:
+      type: array
+      items:
+        type: string
+
+    UserAuthPayload:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          nullable: true
+        company_id:
+          type: integer
+          format: int64
+          nullable: true
+        active_company_id:
+          type: integer
+          format: int64
+          nullable: true
+        roles:
+          $ref: "#/components/schemas/RolesArray"
+        company_status:
+          type: string
+          nullable: true
+      additionalProperties: true
+
+    ProfileResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          nullable: true
+        company_id:
+          type: integer
+          format: int64
+          nullable: true
+        company_name:
+          type: string
+          nullable: true
+        roles:
+          $ref: "#/components/schemas/RolesArray"
+      additionalProperties: true
+
+    SignupRequest:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+              nullable: true
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+            password_confirmation:
+              type: string
+            company_name:
+              type: string
+              nullable: true
+            domain:
+              type: string
+              nullable: true
+            company_size:
+              type: string
+              nullable: true
+            industry:
+              type: string
+              nullable: true
+            address_line1:
+              type: string
+              nullable: true
+            address_line2:
+              type: string
+              nullable: true
+            city:
+              type: string
+              nullable: true
+            state:
+              type: string
+              nullable: true
+            country:
+              type: string
+              nullable: true
+            postal_code:
+              type: string
+              nullable: true
+            contact_email:
+              type: string
+              format: email
+              nullable: true
+            contact_phone:
+              type: string
+              nullable: true
+          required:
+            - email
+            - password
+            - password_confirmation
+      required: [user]
+
+    LoginRequest:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+          required: [email, password]
+      required: [user]
+
+    PatchProfileRequest:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            name:
+              type: string
+              nullable: true
+            email:
+              type: string
+              format: email
+              nullable: true
+            current_password:
+              type: string
+              nullable: true
+            password:
+              type: string
+              nullable: true
+            password_confirmation:
+              type: string
+              nullable: true
+      required: [user]
+
+    Company:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        domain:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+        status:
+          type: string
+          nullable: true
+        company_size:
+          type: string
+          nullable: true
+        industry:
+          type: string
+          nullable: true
+        address_line1:
+          type: string
+          nullable: true
+        address_line2:
+          type: string
+          nullable: true
+        city:
+          type: string
+          nullable: true
+        state:
+          type: string
+          nullable: true
+        country:
+          type: string
+          nullable: true
+        postal_code:
+          type: string
+          nullable: true
+        contact_email:
+          type: string
+          format: email
+          nullable: true
+        contact_phone:
+          type: string
+          nullable: true
+        admin_user_id:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+
+    CompanyStatusResponse:
+      type: object
+      properties:
+        company:
+          $ref: "#/components/schemas/Company"
+        admin_user:
+          type: object
+          nullable: true
+          properties:
+            name:
+              type: string
+              nullable: true
+            email:
+              type: string
+              format: email
+              nullable: true
+      additionalProperties: true
+
+    CreateCompanyRequest:
+      type: object
+      properties:
+        company:
+          type: object
+          properties:
+            company_name:
+              type: string
+              nullable: true
+            name:
+              type: string
+              nullable: true
+            domain:
+              type: string
+              nullable: true
+            company_size:
+              type: string
+              nullable: true
+            industry:
+              type: string
+              nullable: true
+            address_line1:
+              type: string
+              nullable: true
+            address_line2:
+              type: string
+              nullable: true
+            city:
+              type: string
+              nullable: true
+            state:
+              type: string
+              nullable: true
+            country:
+              type: string
+              nullable: true
+            postal_code:
+              type: string
+              nullable: true
+            contact_email:
+              type: string
+              format: email
+              nullable: true
+            contact_phone:
+              type: string
+              nullable: true
+            active:
+              type: boolean
+              nullable: true
+            status:
+              type: string
+              nullable: true
+          additionalProperties: true
+      required: [company]
+
+    CompanyUser:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        email:
+          type: string
+          format: email
+        company_id:
+          type: integer
+          format: int64
+          nullable: true
+        roles:
+          $ref: "#/components/schemas/RolesArray"
+      additionalProperties: true
+
+    CreateCompanyUserRequest:
+      type: object
+      properties:
+        user:
+          type: object
+          properties:
+            email:
+              type: string
+              format: email
+            password:
+              type: string
+            password_confirmation:
+              type: string
+          required: [email, password, password_confirmation]
+        role:
+          type: string
+          nullable: true
+          description: Role name (Admin, Recruiter, Hiring Manager, Interviewer)
+      required: [user]
+
+    Job:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        status:
+          type: string
+          nullable: true
+        department:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        company_id:
+          type: integer
+          format: int64
+        created_by_id:
+          type: integer
+          format: int64
+          nullable: true
+        experience_level:
+          type: string
+          nullable: true
+        required_skills:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+
+    JobSummary:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        title:
+          type: string
+        description:
+          type: string
+        department:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        experience_level:
+          type: string
+          nullable: true
+        required_skills:
+          type: array
+          items:
+            type: string
+        company:
+          $ref: "#/components/schemas/CompanyRef"
+      additionalProperties: true
+
+    CompanyRef:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        domain:
+          type: string
+      additionalProperties: true
+
+    CreateJobRequest:
+      type: object
+      properties:
+        job:
+          type: object
+          properties:
+            title:
+              type: string
+            description:
+              type: string
+            status:
+              type: string
+              nullable: true
+            department:
+              type: string
+              nullable: true
+            location:
+              type: string
+              nullable: true
+            experience_level:
+              type: string
+              nullable: true
+            required_skills:
+              type: array
+              items:
+                type: string
+      required: [job]
+
+    Candidate:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        resume_url:
+          type: string
+          format: uri
+          nullable: true
+        linkedin_url:
+          type: string
+          format: uri
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        company_id:
+          type: integer
+          format: int64
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+        resume_text:
+          type: string
+          nullable: true
+        skills:
+          type: array
+          items:
+            type: string
+        ai_match_score:
+          type: number
+          format: decimal
+          nullable: true
+        password_digest:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+      additionalProperties: true
+
+    CandidateAuthPayload:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        skills:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+
+    CandidateAuthRequest:
+      type: object
+      properties:
+        candidate:
+          type: object
+          properties:
+            name:
+              type: string
+              nullable: true
+            email:
+              type: string
+              format: email
+            phone:
+              type: string
+              nullable: true
+            password:
+              type: string
+            password_confirmation:
+              type: string
+            location:
+              type: string
+              nullable: true
+            skills:
+              type: array
+              items:
+                type: string
+          required: [email, password, password_confirmation]
+      required: [candidate]
+
+    CreateCandidateRequest:
+      type: object
+      properties:
+        candidate:
+          type: object
+          properties:
+            name:
+              type: string
+            email:
+              type: string
+              format: email
+            phone:
+              type: string
+              nullable: true
+            resume_url:
+              type: string
+              format: uri
+              nullable: true
+            linkedin_url:
+              type: string
+              format: uri
+              nullable: true
+            status:
+              type: string
+              nullable: true
+      required: [candidate]
+
+    ParseResumeRequest:
+      type: object
+      properties:
+        resume_text:
+          type: string
+          nullable: true
+      required: []
+
+    Application:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        job_id:
+          type: integer
+          format: int64
+        candidate_id:
+          type: integer
+          format: int64
+        user_id:
+          type: integer
+          format: int64
+          nullable: true
+        status:
+          type: string
+          nullable: true
+        applied_at:
+          type: string
+          format: date-time
+          nullable: true
+        resume_url:
+          type: string
+          nullable: true
+        cover_note:
+          type: string
+          nullable: true
+        ai_score:
+          type: number
+          format: decimal
+          nullable: true
+        parsed_skills:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+
+    CreateApplicationRequest:
+      type: object
+      properties:
+        application:
+          type: object
+          properties:
+            job_id:
+              type: integer
+              format: int64
+            candidate_id:
+              type: integer
+              format: int64
+            status:
+              type: string
+              nullable: true
+            applied_at:
+              type: string
+              format: date-time
+              nullable: true
+            resume_url:
+              type: string
+              nullable: true
+            cover_note:
+              type: string
+              nullable: true
+            ai_score:
+              type: number
+              format: decimal
+              nullable: true
+            parsed_skills:
+              type: array
+              items:
+                type: string
+      required: [application]
+
+    CreateCandidateApplicationRequest:
+      type: object
+      properties:
+        application:
+          type: object
+          properties:
+            job_id:
+              type: integer
+              format: int64
+            resume_url:
+              type: string
+              nullable: true
+            cover_note:
+              type: string
+              nullable: true
+          required: [job_id]
+      required: [application]
+
+    Interview:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        application_id:
+          type: integer
+          format: int64
+        round_type:
+          type: string
+          nullable: true
+        interviewer_id:
+          type: integer
+          format: int64
+          nullable: true
+        scheduled_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          nullable: true
+        meeting_link:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+
+    CreateInterviewRequest:
+      type: object
+      properties:
+        interview:
+          type: object
+          properties:
+            application_id:
+              type: integer
+              format: int64
+            round_type:
+              type: string
+              nullable: true
+            interviewer_id:
+              type: integer
+              format: int64
+              nullable: true
+            scheduled_at:
+              type: string
+              format: date-time
+            status:
+              type: string
+              nullable: true
+      required: [interview]
+
+    Feedback:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        interview_id:
+          type: integer
+          format: int64
+        rating:
+          type: integer
+          format: int32
+        strengths:
+          type: string
+          nullable: true
+        weaknesses:
+          type: string
+          nullable: true
+        recommendation:
+          type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: true
+
+    CreateFeedbackRequest:
+      type: object
+      properties:
+        feedback:
+          type: object
+          properties:
+            interview_id:
+              type: integer
+              format: int64
+            rating:
+              type: integer
+              format: int32
+            strengths:
+              type: string
+              nullable: true
+            weaknesses:
+              type: string
+              nullable: true
+            recommendation:
+              type: string
+      required: [feedback]
+
+    DashboardSummary:
+      type: object
+      properties:
+        total_jobs:
+          type: integer
+        active_jobs:
+          type: integer
+        total_candidates:
+          type: integer
+        total_applications:
+          type: integer
+
+    DashboardPipeline:
+      type: object
+      properties:
+        pipeline:
+          type: object
+          additionalProperties:
+            type: integer
+
+    DashboardReports:
+      type: object
+      properties:
+        total_interviews:
+          type: integer
+        completed_interviews:
+          type: integer
+        interview_conversion_rate:
+          type: number
+          format: decimal
+        hired_count:
+          type: integer
+        hiring_rate:
+          type: number
+          format: decimal
+
+    CandidateApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        job_id:
+          type: integer
+          format: int64
+        job_title:
+          type: string
+        company_name:
+          type: string
+          nullable: true
+        company_id:
+          type: integer
+          format: int64
+          nullable: true
+        applied_at:
+          type: string
+          format: date-time
+        status:
+          type: string
+          nullable: true
+        resume_url:
+          type: string
+          nullable: true
+        cover_note:
+          type: string
+          nullable: true
+        ai_score:
+          type: number
+          format: decimal
+          nullable: true
+        interview:
+          type: object
+          nullable: true
+          properties:
+            id:
+              type: integer
+              format: int64
+            round_type:
+              type: string
+              nullable: true
+            scheduled_at:
+              type: string
+              format: date-time
+            meeting_link:
+              type: string
+              nullable: true
+            interviewer:
+              type: object
+              nullable: true
+              properties:
+                id:
+                  type: integer
+                  format: int64
+                name:
+                  type: string
+                  nullable: true
+                email:
+                  type: string
+                  format: email
+                  nullable: true
+      additionalProperties: true
+
+  responses:
+    Unauthorized401:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden403:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound404:
+      description: Not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  parameters:
+    XCompanyIDHeader:
+      name: X-Company-ID
+      in: header
+      required: false
+      schema:
+        type: string
+      description: Active company id for multi-company admins.
+
+paths:
+  /signup:
+    post:
+      tags: [Auth]
+      summary: Recruiter/internal signup
+      operationId: signup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: Account created (pending company approval)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/UserAuthPayload"
+                  token:
+                    type: string
+                  pending:
+                    type: boolean
+                  message:
+                    type: string
+                required: [user, token, pending, message]
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /login:
+    post:
+      tags: [Auth]
+      summary: Recruiter/internal login
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/UserAuthPayload"
+                  token:
+                    type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /profile:
+    get:
+      tags: [Auth]
+      summary: Current recruiter/internal profile
+      operationId: getProfile
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Profile JSON
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+    patch:
+      tags: [Auth]
+      summary: Update profile (name/email, and optionally password)
+      operationId: patchProfile
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatchProfileRequest"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProfileResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /company/status:
+    get:
+      tags: [Company]
+      summary: Active company details for pending/rejected UI
+      operationId: getCompanyStatus
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Current tenant and admin identity
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyStatusResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /companies:
+    get:
+      tags: [Company]
+      summary: List companies (owned by active admin; Super Admin sees all)
+      operationId: listCompanies
+      security:
+        - RecruiterJWT: []
+      responses:
+        "200":
+          description: Company array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Company"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+    post:
+      tags: [Company]
+      summary: Create a new company tenant (created in pending status)
+      operationId: createCompany
+      security:
+        - RecruiterJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyRequest"
+      responses:
+        "201":
+          description: Company created (pending approval)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  company:
+                    $ref: "#/components/schemas/Company"
+                  user:
+                    $ref: "#/components/schemas/UserAuthPayload"
+                  pending:
+                    type: boolean
+                  message:
+                    type: string
+                required: [company, user, pending, message]
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /companies/{id}:
+    get:
+      tags: [Company]
+      summary: Get company by id
+      operationId: getCompany
+      security:
+        - RecruiterJWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+    put:
+      tags: [Company]
+      summary: Update company (Super Admin can toggle active/status)
+      operationId: updateCompany
+      security:
+        - RecruiterJWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyRequest"
+      responses:
+        "200":
+          description: Updated company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Company"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /companies/{company_id}/users:
+    get:
+      tags: [Company]
+      summary: List users for a company (Admin/Recruiter)
+      operationId: listCompanyUsers
+      security:
+        - RecruiterJWT: []
+      parameters:
+        - name: company_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Company users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CompanyUser"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+    post:
+      tags: [Company]
+      summary: Create company user and assign role (Admin/Recruiter)
+      operationId: createCompanyUser
+      security:
+        - RecruiterJWT: []
+      parameters:
+        - name: company_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyUserRequest"
+      responses:
+        "201":
+          description: Created user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompanyUser"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /jobs:
+    get:
+      tags: [Jobs]
+      summary: List jobs for current company
+      operationId: listJobs
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            nullable: true
+            description: Optional job status filter (e.g. draft/published/closed)
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Jobs array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Job"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+    post:
+      tags: [Jobs]
+      summary: Create job in current company
+      operationId: createJob
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobRequest"
+      responses:
+        "201":
+          description: Created job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /jobs/{id}:
+    get:
+      tags: [Jobs]
+      summary: Get a job by id
+      operationId: getJob
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+    put:
+      tags: [Jobs]
+      summary: Update job
+      operationId: updateJob
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateJobRequest"
+      responses:
+        "200":
+          description: Updated job
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Job"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags: [Jobs]
+      summary: Delete job
+      operationId: deleteJob
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /jobs/{id}/top_candidates:
+    get:
+      tags: [Jobs]
+      summary: Top candidates for a job (AI match score)
+      operationId: getTopCandidates
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Candidates ranked by ai_match_score for this job
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  job_id:
+                    type: integer
+                    format: int64
+                  candidates:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Candidate"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+
+  /candidates:
+    get:
+      tags: [Candidates]
+      summary: List internal candidates for the active company context
+      operationId: listCandidates
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            nullable: true
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Candidate array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Candidate"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+    post:
+      tags: [Candidates]
+      summary: Create internal candidate in current company
+      operationId: createCandidate
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCandidateRequest"
+      responses:
+        "201":
+          description: Created candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /candidates/{id}:
+    get:
+      tags: [Candidates]
+      summary: Get candidate by id
+      operationId: getCandidate
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+    put:
+      tags: [Candidates]
+      summary: Update candidate
+      operationId: updateCandidate
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCandidateRequest"
+      responses:
+        "200":
+          description: Updated candidate
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Candidate"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags: [Candidates]
+      summary: Delete candidate
+      operationId: deleteCandidate
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /candidates/{id}/parse_resume:
+    post:
+      tags: [Candidates]
+      summary: Parse resume text and extract skills for a candidate
+      operationId: parseCandidateResume
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ParseResumeRequest"
+      responses:
+        "200":
+          description: Parsed resume + extracted skills
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  candidate:
+                    $ref: "#/components/schemas/Candidate"
+                  skills:
+                    type: array
+                    items:
+                      type: string
+                required: [candidate, skills]
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+
+  /applications:
+    get:
+      tags: [Applications]
+      summary: List applications for the active company context
+      operationId: listApplications
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: job_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: candidate_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            nullable: true
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Applications array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+    post:
+      tags: [Applications]
+      summary: Create an application (recruiter side)
+      operationId: createApplication
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApplicationRequest"
+      responses:
+        "201":
+          description: Created application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /applications/{id}:
+    get:
+      tags: [Applications]
+      summary: Get application
+      operationId: getApplication
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+    put:
+      tags: [Applications]
+      summary: Update application
+      operationId: updateApplication
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApplicationRequest"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags: [Applications]
+      summary: Delete application
+      operationId: deleteApplication
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /interviews:
+    get:
+      tags: [Interviews]
+      summary: List interviews for the active company
+      operationId: listInterviews
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: application_id
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+        - name: mine
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Interview array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Interview"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+    post:
+      tags: [Interviews]
+      summary: Create interview
+      operationId: createInterview
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInterviewRequest"
+      responses:
+        "201":
+          description: Created interview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Interview"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /interviews/{id}:
+    get:
+      tags: [Interviews]
+      summary: Get interview
+      operationId: getInterview
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Interview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Interview"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+    put:
+      tags: [Interviews]
+      summary: Update interview
+      operationId: updateInterview
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateInterviewRequest"
+      responses:
+        "200":
+          description: Updated interview
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Interview"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags: [Interviews]
+      summary: Delete interview
+      operationId: deleteInterview
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /feedback/{interview_id}:
+    get:
+      tags: [Feedback]
+      summary: List feedback for an interview
+      operationId: listFeedbackForInterview
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: interview_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Feedback array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Feedback"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+
+  /feedbacks:
+    post:
+      tags: [Feedback]
+      summary: Create feedback
+      operationId: createFeedback
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeedbackRequest"
+      responses:
+        "201":
+          description: Created feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /feedbacks/{id}:
+    get:
+      tags: [Feedback]
+      summary: Get feedback
+      operationId: getFeedback
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+    put:
+      tags: [Feedback]
+      summary: Update feedback
+      operationId: updateFeedback
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateFeedbackRequest"
+      responses:
+        "200":
+          description: Updated feedback
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Feedback"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      tags: [Feedback]
+      summary: Delete feedback
+      operationId: deleteFeedback
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "204":
+          description: Deleted
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Dashboard summary metrics
+      operationId: dashboardSummary
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Summary metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /dashboard/pipeline:
+    get:
+      tags: [Dashboard]
+      summary: Pipeline counts grouped by status
+      operationId: dashboardPipeline
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Pipeline map
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardPipeline"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /dashboard/reports:
+    get:
+      tags: [Dashboard]
+      summary: Dashboard interview/report metrics
+      operationId: dashboardReports
+      security:
+        - RecruiterJWT: []
+          XCompanyID: []
+      parameters:
+        - $ref: "#/components/parameters/XCompanyIDHeader"
+      responses:
+        "200":
+          description: Reports metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardReports"
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /public/jobs:
+    get:
+      tags: [CandidatePublic]
+      summary: Public job board (active jobs)
+      operationId: publicJobsIndex
+      parameters:
+        - name: title
+          in: query
+          required: false
+          schema: { type: string }
+        - name: location
+          in: query
+          required: false
+          schema: { type: string }
+        - name: skills
+          in: query
+          required: false
+          schema: { type: string, description: "Single skill string to match against required_skills array" }
+        - name: experience_level
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Job summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobSummary"
+
+  /public/jobs/{id}:
+    get:
+      tags: [CandidatePublic]
+      summary: Public job details
+      operationId: publicJobsShow
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Job summary including company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobSummary"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+
+  /candidate/signup:
+    post:
+      tags: [Candidate]
+      summary: Candidate signup (separate auth)
+      operationId: candidateSignup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidateAuthRequest"
+      responses:
+        "201":
+          description: Candidate created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  candidate:
+                    $ref: "#/components/schemas/CandidateAuthPayload"
+                  token:
+                    type: string
+                required: [candidate, token]
+
+  /candidate/login:
+    post:
+      tags: [Candidate]
+      summary: Candidate login (separate auth)
+      operationId: candidateLogin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CandidateAuthRequest"
+      responses:
+        "200":
+          description: Candidate authenticated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  candidate:
+                    $ref: "#/components/schemas/CandidateAuthPayload"
+                  token:
+                    type: string
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+
+  /candidate/jobs:
+    get:
+      tags: [Candidate]
+      summary: Candidate-scoped job board (scoped by candidate company_id when available)
+      operationId: candidateJobsIndex
+      security:
+        - CandidateJWT: []
+      parameters:
+        - name: title
+          in: query
+          required: false
+          schema: { type: string }
+        - name: location
+          in: query
+          required: false
+          schema: { type: string }
+        - name: skills
+          in: query
+          required: false
+          schema: { type: string, description: "Single skill string to match against required_skills array" }
+        - name: experience_level
+          in: query
+          required: false
+          schema: { type: string }
+      responses:
+        "200":
+          description: Candidate job summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/JobSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+
+  /candidate/jobs/{id}:
+    get:
+      tags: [Candidate]
+      summary: Candidate-scoped job details
+      operationId: candidateJobsShow
+      security:
+        - CandidateJWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Candidate job details including company
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JobSummary"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+
+  /candidate/dashboard:
+    get:
+      tags: [Candidate]
+      summary: Candidate applications (candidate dashboard)
+      operationId: candidateDashboard
+      security:
+        - CandidateJWT: []
+      responses:
+        "200":
+          description: Candidate applications array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CandidateApplication"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+
+  /candidate/applications:
+    post:
+      tags: [Candidate]
+      summary: Apply to a job (creates application)
+      operationId: candidateApply
+      security:
+        - CandidateJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCandidateApplicationRequest"
+      responses:
+        "201":
+          description: Created candidate application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CandidateApplication"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "422":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /candidate/applications/{id}:
+    get:
+      tags: [Candidate]
+      summary: Get a single candidate application (includes scheduled interview when present)
+      operationId: candidateApplicationShow
+      security:
+        - CandidateJWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        "200":
+          description: Candidate application (optionally with interview)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CandidateApplication"
+        "401":
+          $ref: "#/components/responses/Unauthorized401"
+        "404":
+          $ref: "#/components/responses/NotFound404"
+
+  /super-admin/companies:
+    get:
+      tags: [SuperAdmin]
+      summary: Super Admin list companies (all tenants)
+      operationId: superAdminListCompanies
+      security:
+        - RecruiterJWT: []
+      responses:
+        "200":
+          description: Company objects merged with admin_user
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  allOf:
+                    - $ref: "#/components/schemas/Company"
+                    - type: object
+                      properties:
+                        admin_user:
+                          type: object
+                          nullable: true
+                          properties:
+                            name:
+                              type: string
+                              nullable: true
+                            email:
+                              type: string
+                              format: email
+                              nullable: true
+    post:
+      tags: [SuperAdmin]
+      summary: Super Admin create company
+      operationId: superAdminCreateCompany
+      security:
+        - RecruiterJWT: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyRequest"
+      responses:
+        "201":
+          description: Created company (with admin_user when available)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Company"
+                  - type: object
+                    properties:
+                      admin_user:
+                        type: object
+                        nullable: true
+                        properties:
+                          name:
+                            type: string
+                            nullable: true
+                          email:
+                            type: string
+                            format: email
+                            nullable: true
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /super-admin/companies/{id}:
+    put:
+      tags: [SuperAdmin]
+      summary: Super Admin update company status/active fields
+      operationId: superAdminUpdateCompany
+      security:
+        - RecruiterJWT: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCompanyRequest"
+      responses:
+        "200":
+          description: Updated company (with admin_user when available)
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: "#/components/schemas/Company"
+                  - type: object
+                    properties:
+                      admin_user:
+                        type: object
+                        nullable: true
+                        properties:
+                          name:
+                            type: string
+                            nullable: true
+                          email:
+                            type: string
+                            format: email
+                            nullable: true
+        "403":
+          $ref: "#/components/responses/Forbidden403"
+
+  /super-admin/users:
+    get:
+      tags: [SuperAdmin]
+      summary: Super Admin list all users
+      operationId: superAdminListUsers
+      security:
+        - RecruiterJWT: []
+      responses:
+        "200":
+          description: Users array
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: integer
+                      format: int64
+                    email:
+                      type: string
+                      format: email
+                    name:
+                      type: string
+                      nullable: true
+                    company_id:
+                      type: integer
+                      format: int64
+                      nullable: true
+                    company_name:
+                      type: string
+                      nullable: true
+                    roles:
+                      $ref: "#/components/schemas/RolesArray"
+
+  /super-admin/analytics/summary:
+    get:
+      tags: [SuperAdmin]
+      summary: Super Admin analytics summary (system-wide counts)
+      operationId: superAdminAnalyticsSummary
+      security:
+        - RecruiterJWT: []
+      responses:
+        "200":
+          description: System-wide analytics counts
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_companies:
+                    type: integer
+                  active_companies:
+                    type: integer
+                  total_users:
+                    type: integer
+                  total_jobs:
+                    type: integer
+                  total_candidates:
+                    type: integer
+                  total_applications:
+                    type: integer
+                  total_interviews:
+                    type: integer
+
+  /up:
+    get:
+      tags: [Auth]
+      summary: Health check
+      operationId: railsHealth
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true

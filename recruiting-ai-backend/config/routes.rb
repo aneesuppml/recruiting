@@ -3,6 +3,10 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  # OpenAPI / Swagger UI
+  get "api-docs", to: "api_docs#ui"
+  get "api-docs/openapi.yaml", to: "api_docs#openapi"
+
   # Auth (no authentication required)
   post "signup", to: "auth#signup"
   post "login", to: "auth#login"
