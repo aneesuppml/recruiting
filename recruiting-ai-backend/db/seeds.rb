@@ -12,14 +12,25 @@ if Rails.env.development? || Rails.env.test?
 end
 
 # Ensure default roles exist
-%w[Admin Recruiter Hiring\ Manager Interviewer].each { |name| Role.find_or_create_by!(name: name) }
+%w[Super\ Admin Admin Recruiter Hiring\ Manager Interviewer].each { |name| Role.find_or_create_by!(name: name) }
 
+super_admin_role = Role.find_by!(name: "Super Admin")
 admin_role = Role.find_by!(name: "Admin")
 recruiter_role = Role.find_by!(name: "Recruiter")
 hiring_manager_role = Role.find_by!(name: "Hiring Manager")
 interviewer_role = Role.find_by!(name: "Interviewer")
 
 ActiveRecord::Base.transaction do
+  # --- 0. Super Admin (global) ---
+  super_admin = User.create!(
+    name: "Super Admin",
+    email: "superadmin@example.com",
+    password: SEED_PASSWORD,
+    password_confirmation: SEED_PASSWORD,
+    company_id: nil
+  )
+  Membership.create!(user: super_admin, role: super_admin_role)
+
   # --- 1. Companies (3) ---
   companies = 3.times.map do |i|
     Company.create!(

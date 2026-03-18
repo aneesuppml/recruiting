@@ -53,4 +53,10 @@ Rails.application.routes.draw do
   get "dashboard/summary", to: "dashboard#summary"
   get "dashboard/pipeline", to: "dashboard#pipeline"
   get "dashboard/reports", to: "dashboard#reports"
+
+  namespace :super_admin, path: "super-admin" do
+    resources :companies, only: %i[index create update]
+    resources :users, only: %i[index]
+    get "analytics/summary", to: "analytics#summary"
+  end
 end

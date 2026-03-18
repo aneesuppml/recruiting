@@ -12,7 +12,7 @@ class CompaniesController < ApplicationController
   before_action :require_can_update_company!, only: %i[update]
 
   def index
-    companies = current_user.admin? ? Company.all : Company.where(id: current_user.company_id)
+    companies = current_user.super_admin? ? Company.all : (current_user.admin? ? Company.all : Company.where(id: current_user.company_id))
     render json: companies
   end
 
@@ -23,9 +23,11 @@ class CompaniesController < ApplicationController
   def create
     company = Company.new(company_params)
     if company.save
-      current_user.update!(company_id: company.id)
       ensure_default_roles
-      assign_admin_role(current_user)
+      unless current_user.super_admin?
+        current_user.update!(company_id: company.id)
+        assign_admin_role(current_user)
+      end
       render json: company, status: :created
     else
       render json: { errors: company.errors.full_messages }, status: :unprocessable_entity
@@ -52,11 +54,13 @@ class CompaniesController < ApplicationController
   end
 
   def company_params
-    params.require(:company).permit(:name, :domain)
+    permitted = %i[name domain]
+    permitted << :active if current_user.super_admin?
+    params.require(:company).permit(permitted)
   end
 
   def ensure_default_roles
-    %w[Admin Recruiter Hiring Manager Interviewer].each do |name|
+    %w[Super Admin Admin Recruiter Hiring Manager Interviewer].each do |name|
       Role.find_or_create_by!(name: name)
     end
   end

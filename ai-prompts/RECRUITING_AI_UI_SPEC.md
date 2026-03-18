@@ -117,6 +117,7 @@ Create reusable custom hooks for API logic. Hooks must encapsulate API calls so 
 | useCandidateAuth.js | candidate signup (POST candidate/signup), candidate login (POST candidate/login); do not rethrow on error so no unhandled rejection |
 | usePublicJobs.js | fetch public jobs (GET public/jobs with filters), fetch job (GET public/jobs/:id) |
 | useCandidateApplications.js | fetch my applications (GET candidate/dashboard), fetch one (GET candidate/applications/:id), apply (POST candidate/applications); use **candidateApi** (candidate token) |
+| useSuperAdmin.js | Super Admin: manage companies, view users, system analytics |
 
 **Error handling in hooks:**
 
@@ -153,6 +154,7 @@ src/
     useCandidateAuth.js
     usePublicJobs.js
     useCandidateApplications.js
+    useSuperAdmin.js
   pages/
     Login.jsx
     Register.jsx
@@ -175,6 +177,10 @@ src/
       ApplyJob.jsx
       CandidateDashboard.jsx
       ApplicationStatus.jsx
+    super-admin/
+      SuperAdminCompanies.jsx
+      SuperAdminUsers.jsx
+      SuperAdminAnalytics.jsx
   services/
     api.js
     candidateApi.js
@@ -195,6 +201,14 @@ src/
 - **UserProfileMenu:** Circular avatar with **initials** (from user name, or email if no name). Display **user name** next to avatar (fallback to email, then "User"). On avatar/name click: dropdown with shadow, close on outside click.
 - **Dropdown items:** Profile → navigate to /settings/profile; Settings → navigate to /settings; Logout → call logout from auth context, redirect to /login. Dropdown header shows name and email.
 - **Icons:** Use lucide-react (no emojis).
+
+### Super Admin header & profile menu
+
+Super Admin uses a separate layout and header:
+- **SuperAdminLayout:** dark-grey header + super-admin sidebar.
+- **Right side profile:** show avatar/initials + name/email.
+- **Dropdown items:** Profile → `/super-admin/profile`, Logout → call `logout()` from `useAuth()` and redirect to `/login`.
+- Close dropdown on outside click (same UX pattern as `UserProfileMenu`).
 
 ---
 
@@ -314,13 +328,35 @@ src/
 
 ## Role-Based Access Control (RBAC)
 
-**Roles (from API):** Admin, Recruiter, Hiring Manager, Interviewer. User object from login and GET /profile includes **roles** (array of strings).
+**Roles (from API):** Super Admin, Admin, Recruiter, Hiring Manager, Interviewer. User object from login and GET /profile includes **roles** (array of strings).
 
 **Permission layer:** `src/lib/permissions.js` defines a permission matrix (e.g. `canViewJobs`, `canManageJobs`, `canViewDashboard`). `src/hooks/usePermissions.js` returns these flags for the current user. Use for conditional UI and route guards.
 
 **Sidebar:** Show only nav items the user is allowed to see (e.g. Interviewer sees only Interviews and Feedback; Hiring Manager sees Dashboard, Jobs, Candidates, Applications, Interviews, Feedback, Reports; Admin sees all including Companies, Users, Settings).
 
 **Route protection:** `RoleProtectedRoute` wraps recruiter routes. If the current path requires a permission the user doesn’t have, redirect to the first allowed path (e.g. Interviewer without dashboard access is sent to /interviews). Default route "/" and "*" redirect authenticated users to their first allowed path (not always /dashboard).
+
+### Super Admin module (platform-wide)
+
+**Routes:** `/super-admin/*` (only Super Admin can access)
+
+**UI:** Separate Super Admin layout + sidebar with:
+- Companies
+- Users
+- System Analytics
+- Header profile dropdown (Profile, Logout)
+
+**API endpoints (Super Admin):**
+- `GET /super-admin/companies`
+- `POST /super-admin/companies`
+- `PUT /super-admin/companies/:id` (supports toggling `active`)
+- `GET /super-admin/users`
+- `GET /super-admin/analytics/summary`
+
+**Frontend enforcement:**
+- Add `SuperAdminRoute` guard that blocks non-super-admin users from `/super-admin/*`.
+- Hide the regular recruiter sidebar when viewing the Super Admin module (use a dedicated layout).
+- Add `/super-admin/profile` route (Super Admin profile page) and wire header dropdown to it.
 
 **Important edge case (localStorage sessions):**
 - If an older stored recruiter session exists without `user.roles`, the UI should avoid redirect loops. `RoleProtectedRoute` should skip RBAC redirects until roles are available; backend remains the source of truth.
@@ -381,4 +417,4 @@ Design the UI similar to a modern ATS recruiting dashboard used by recruiting te
 
 ---
 
-*Last updated: RBAC UI (permissions + sidebar filtering + `RoleProtectedRoute` redirects), blue/white/dark-grey theme applied across shared components/pages, improved hook error handling to avoid unhandled rejections, and candidate UI as before.*
+*Last updated: Super Admin module (routes, layout, companies/users/analytics pages, header profile dropdown + /super-admin/profile); RBAC UI (permissions + `RoleProtectedRoute` + `SuperAdminRoute`), blue/white/dark-grey theme, improved hook error handling, and candidate UI as before.*

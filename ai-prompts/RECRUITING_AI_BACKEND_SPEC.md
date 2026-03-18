@@ -265,35 +265,55 @@ Provide analytics endpoints.
 
 ## Role-Based Access Control (RBAC)
 
-**Roles:** Admin, Recruiter, Hiring Manager, Interviewer. (Candidates use separate candidate auth; they are not User roles.)
+**Roles:** Super Admin, Admin, Recruiter, Hiring Manager, Interviewer. (Candidates use separate candidate auth; they are not User roles.)
 
 **Enforcement:** `Authorizable` concern in `app/controllers/concerns/authorizable.rb`. All protected endpoints run role checks and return **403 Forbidden** when the current user’s role is not allowed for that action. Auth and profile responses include **roles** (array of role names) so clients can drive UI.
 
+### Super Admin (platform-wide)
+
+Super Admin is the highest-level role across **all** tenants. This role is intended for platform operators and is not company-scoped.
+
+**Company lifecycle:**
+- Companies have an `active` flag (default true). Super Admin can deactivate/reactivate companies.
+
+**Super Admin endpoints:**
+- `GET /super-admin/companies`
+- `POST /super-admin/companies`
+- `PUT /super-admin/companies/:id`
+- `GET /super-admin/users`
+- `GET /super-admin/analytics/summary`
+
+All `/super-admin/*` endpoints require the Super Admin role and are isolated from company-scoped controllers.
+
+**Seed convenience (development):**
+- Seed creates a global Super Admin user: `superadmin@example.com` / `password123`
+
 **Permission matrix:**
 
-| Area | Admin | Recruiter | Hiring Manager | Interviewer |
-|------|-------|-----------|----------------|--------------|
-| Companies (view) | ✓ | ✓ (own) | ✓ (own) | ✗ |
-| Companies (create/update) | ✓ | ✗ | ✗ | ✗ |
-| Company users | ✓ | ✓ (same company) | ✗ | ✗ |
-| Jobs (view) | ✓ | ✓ | ✓ | ✗ |
-| Jobs (create/update/destroy) | ✓ | ✓ | ✗ | ✗ |
-| Candidates (view) | ✓ | ✓ | ✓ | ✗ |
-| Candidates (manage) | ✓ | ✓ | ✗ | ✗ |
-| Applications (view) | ✓ | ✓ | ✓ | ✗ |
-| Applications (create/destroy) | ✓ | ✓ | ✗ | ✗ |
-| Applications (update/review) | ✓ | ✓ | ✓ | ✗ |
-| Interviews (view) | ✓ | ✓ | ✓ | ✓ (assigned only) |
-| Interviews (create/update/destroy) | ✓ | ✓ | ✗ | ✗ |
-| Feedback (view/submit) | ✓ | ✓ | ✓ | ✓ (assigned only) |
-| Dashboard / Reports | ✓ | ✓ | ✓ | ✗ |
-| Settings | ✓ | ✗ | ✗ | ✗ |
+| Area | Super Admin | Admin | Recruiter | Hiring Manager | Interviewer |
+|------|-------------|-------|-----------|----------------|--------------|
+| Super Admin module | ✓ | ✗ | ✗ | ✗ | ✗ |
+| Companies (view) | ✓ | ✓ | ✓ (own) | ✓ (own) | ✗ |
+| Companies (create/update) | ✓ | ✓ | ✗ | ✗ | ✗ |
+| Company users | ✓ | ✓ | ✓ (same company) | ✗ | ✗ |
+| Jobs (view) | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Jobs (create/update/destroy) | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Candidates (view) | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Candidates (manage) | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Applications (view) | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Applications (create/destroy) | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Applications (update/review) | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Interviews (view) | ✓ | ✓ | ✓ | ✓ | ✓ (assigned only) |
+| Interviews (create/update/destroy) | ✓ | ✓ | ✓ | ✗ | ✗ |
+| Feedback (view/submit) | ✓ | ✓ | ✓ | ✓ | ✓ (assigned only) |
+| Dashboard / Reports | ✓ | ✓ | ✓ | ✓ | ✗ |
+| Settings | ✓ | ✓ | ✗ | ✗ | ✗ |
 
 **Implementation notes:**
-- User model: `admin?`, `recruiter?`, `hiring_manager?`, `interviewer?`, `role_names`.
+- User model: `super_admin?`, `admin?`, `recruiter?`, `hiring_manager?`, `interviewer?`, `role_names`.
 - Interviewer: interviews index returns only those where `interviewer_id == current_user.id`; show/feedback allowed only for assigned interview.
 - Feedback create/update/destroy: interviewer only for feedback belonging to an interview they are assigned to.
-- Seed data includes Hiring Manager role and sample hiring manager users per company.
+- Seed data includes Super Admin + Hiring Manager roles and sample users.
 
 ---
 

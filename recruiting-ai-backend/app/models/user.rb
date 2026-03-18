@@ -32,4 +32,8 @@ class User < ApplicationRecord
   def role_names
     roles.pluck(:name)
   end
+
+  def super_admin?
+    roles.exists?(name: "Super Admin")
+  end
 end

@@ -30,6 +30,7 @@ const navItems = [
 
 export function Sidebar() {
   const permissions = usePermissions();
+  if (permissions.isSuperAdmin) return null;
   const allowed = navItems.filter((item) => permissions[item.permission]);
 
   return (

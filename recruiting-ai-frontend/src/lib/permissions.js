@@ -4,6 +4,7 @@
  */
 
 const ROLES = {
+  SuperAdmin: "Super Admin",
   Admin: "Admin",
   Recruiter: "Recruiter",
   HiringManager: "Hiring Manager",
@@ -27,30 +28,40 @@ function hasAnyRole(roles, allowed) {
  */
 export function getPermissions(user) {
   const roles = user?.roles ?? [];
+  const superAdmin = hasRole(roles, ROLES.SuperAdmin);
   const admin = hasRole(roles, ROLES.Admin);
   const recruiter = hasRole(roles, ROLES.Recruiter);
   const hiringManager = hasRole(roles, ROLES.HiringManager);
   const interviewer = hasRole(roles, ROLES.Interviewer);
 
   return {
-    canViewDashboard: admin || recruiter || hiringManager,
-    canViewCompanies: admin || recruiter || hiringManager,
-    canManageCompanyUsers: admin || recruiter,
-    canViewJobs: admin || recruiter || hiringManager,
-    canManageJobs: admin || recruiter,
-    canViewCandidates: admin || recruiter || hiringManager,
-    canManageCandidates: admin || recruiter,
-    canViewApplications: admin || recruiter || hiringManager,
-    canManageApplications: admin || recruiter,
-    canUpdateApplication: admin || recruiter || hiringManager,
-    canViewInterviews: admin || recruiter || hiringManager || interviewer,
-    canManageInterviews: admin || recruiter,
-    canManageFeedback: admin || recruiter || hiringManager || interviewer,
-    canViewReports: admin || recruiter || hiringManager,
-    canViewSettings: admin,
-    canCreateCompany: admin,
-    canUpdateCompany: admin,
+    // Super Admin module
+    canAccessSuperAdmin: superAdmin,
+    canViewSuperAdminCompanies: superAdmin,
+    canManageSuperAdminCompanies: superAdmin,
+    canViewSuperAdminUsers: superAdmin,
+    canViewSuperAdminAnalytics: superAdmin,
 
+    // Internal recruiter app (Super Admin is allowed to view but may not have a company context)
+    canViewDashboard: superAdmin || admin || recruiter || hiringManager,
+    canViewCompanies: superAdmin || admin || recruiter || hiringManager,
+    canManageCompanyUsers: superAdmin || admin || recruiter,
+    canViewJobs: superAdmin || admin || recruiter || hiringManager,
+    canManageJobs: superAdmin || admin || recruiter,
+    canViewCandidates: superAdmin || admin || recruiter || hiringManager,
+    canManageCandidates: superAdmin || admin || recruiter,
+    canViewApplications: superAdmin || admin || recruiter || hiringManager,
+    canManageApplications: superAdmin || admin || recruiter,
+    canUpdateApplication: superAdmin || admin || recruiter || hiringManager,
+    canViewInterviews: superAdmin || admin || recruiter || hiringManager || interviewer,
+    canManageInterviews: superAdmin || admin || recruiter,
+    canManageFeedback: superAdmin || admin || recruiter || hiringManager || interviewer,
+    canViewReports: superAdmin || admin || recruiter || hiringManager,
+    canViewSettings: superAdmin || admin,
+    canCreateCompany: superAdmin || admin,
+    canUpdateCompany: superAdmin || admin,
+
+    isSuperAdmin: superAdmin,
     isAdmin: admin,
     isRecruiter: recruiter,
     isHiringManager: hiringManager,
@@ -63,6 +74,9 @@ export function getPermissions(user) {
  * First matching prefix wins. Profile is allowed for any authenticated user.
  */
 export const ROUTE_PERMISSIONS = [
+  ["/super-admin/companies", "canViewSuperAdminCompanies"],
+  ["/super-admin/users", "canViewSuperAdminUsers"],
+  ["/super-admin/analytics", "canViewSuperAdminAnalytics"],
   ["/settings/profile", null],
   ["/dashboard", "canViewDashboard"],
   ["/companies", "canViewCompanies"],
@@ -90,6 +104,7 @@ export function getRequiredPermissionForPath(path) {
 /** First path the user is allowed to see (for default redirect when they lack dashboard). */
 export function getDefaultPathForUser(user) {
   const perms = getPermissions(user);
+  if (perms.canAccessSuperAdmin) return "/super-admin/companies";
   if (perms.canViewDashboard) return "/dashboard";
   if (perms.canViewCompanies) return "/companies";
   if (perms.canManageCompanyUsers) return "/users";

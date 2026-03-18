@@ -28,6 +28,12 @@ import { JobDetails } from "./pages/candidate/JobDetails";
 import { ApplyJob } from "./pages/candidate/ApplyJob";
 import { CandidateDashboard } from "./pages/candidate/CandidateDashboard";
 import { ApplicationStatus } from "./pages/candidate/ApplicationStatus";
+import { SuperAdminRoute } from "./components/SuperAdminRoute";
+import { SuperAdminLayout } from "./components/SuperAdminLayout";
+import { SuperAdminCompanies } from "./pages/super-admin/SuperAdminCompanies";
+import { SuperAdminUsers } from "./pages/super-admin/SuperAdminUsers";
+import { SuperAdminAnalytics } from "./pages/super-admin/SuperAdminAnalytics";
+import { Profile as RecruiterProfile } from "./pages/Profile";
 
 function Layout({ children }) {
   return (
@@ -61,6 +67,48 @@ export default function App() {
       <AuthProvider>
         <CandidateAuthProvider>
           <Routes>
+            {/* Super Admin */}
+            <Route
+              path="/super-admin/companies"
+              element={
+                <ProtectedRoute>
+                  <SuperAdminRoute>
+                    <SuperAdminLayout><SuperAdminCompanies /></SuperAdminLayout>
+                  </SuperAdminRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/super-admin/users"
+              element={
+                <ProtectedRoute>
+                  <SuperAdminRoute>
+                    <SuperAdminLayout><SuperAdminUsers /></SuperAdminLayout>
+                  </SuperAdminRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/super-admin/analytics"
+              element={
+                <ProtectedRoute>
+                  <SuperAdminRoute>
+                    <SuperAdminLayout><SuperAdminAnalytics /></SuperAdminLayout>
+                  </SuperAdminRoute>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/super-admin/profile"
+              element={
+                <ProtectedRoute>
+                  <SuperAdminRoute>
+                    <SuperAdminLayout><RecruiterProfile /></SuperAdminLayout>
+                  </SuperAdminRoute>
+                </ProtectedRoute>
+              }
+            />
+
             {/* Candidate-facing (job board, candidate auth, dashboard) */}
             <Route path="/candidate/jobs" element={<CandidateLayout><JobBoard /></CandidateLayout>} />
             <Route path="/candidate/jobs/:id" element={<CandidateLayout><JobDetails /></CandidateLayout>} />
