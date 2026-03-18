@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_03_17_000011) do
+ActiveRecord::Schema[7.2].define(version: 2025_03_18_000005) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -22,6 +22,10 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_17_000011) do
     t.datetime "applied_at", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "resume_url"
+    t.text "cover_note"
+    t.decimal "ai_score", precision: 5, scale: 2
+    t.string "parsed_skills", default: [], array: true
     t.index ["candidate_id"], name: "index_applications_on_candidate_id"
     t.index ["job_id", "candidate_id"], name: "index_applications_on_job_id_and_candidate_id", unique: true
     t.index ["job_id"], name: "index_applications_on_job_id"
@@ -35,14 +39,17 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_17_000011) do
     t.string "resume_url"
     t.string "linkedin_url"
     t.string "status", default: "new", null: false
-    t.bigint "company_id", null: false
+    t.bigint "company_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.text "resume_text"
     t.string "skills", default: [], array: true
     t.decimal "ai_match_score", precision: 5, scale: 2
+    t.string "password_digest"
+    t.string "location"
     t.index ["company_id", "email"], name: "index_candidates_on_company_id_and_email"
     t.index ["company_id"], name: "index_candidates_on_company_id"
+    t.index ["email"], name: "index_candidates_on_email_when_external", unique: true, where: "(company_id IS NULL)"
   end
 
   create_table "companies", force: :cascade do |t|
@@ -71,6 +78,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_17_000011) do
     t.string "status", default: "scheduled", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "meeting_link"
     t.index ["application_id"], name: "index_interviews_on_application_id"
     t.index ["interviewer_id"], name: "index_interviews_on_interviewer_id"
   end
@@ -85,6 +93,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_17_000011) do
     t.bigint "created_by_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "experience_level"
+    t.string "required_skills", default: [], array: true
     t.index ["company_id"], name: "index_jobs_on_company_id"
     t.index ["created_by_id"], name: "index_jobs_on_created_by_id"
   end
@@ -112,6 +122,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_03_17_000011) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.bigint "company_id"
+    t.string "name"
     t.index ["company_id"], name: "index_users_on_company_id"
     t.index ["email"], name: "index_users_on_email", unique: true
   end

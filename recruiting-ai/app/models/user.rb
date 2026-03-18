@@ -24,4 +24,12 @@ class User < ApplicationRecord
   def interviewer?
     roles.exists?(name: "Interviewer")
   end
+
+  def hiring_manager?
+    roles.exists?(name: "Hiring Manager")
+  end
+
+  def role_names
+    roles.pluck(:name)
+  end
 end

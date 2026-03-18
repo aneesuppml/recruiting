@@ -7,6 +7,23 @@ Rails.application.routes.draw do
   post "signup", to: "auth#signup"
   post "login", to: "auth#login"
 
+  # Candidate auth (no recruiter auth required)
+  post "candidate/signup", to: "candidate_auth#signup"
+  post "candidate/login", to: "candidate_auth#login"
+
+  # Public job board (no auth)
+  get "public/jobs", to: "public/jobs#index"
+  get "public/jobs/:id", to: "public/jobs#show", as: :public_job
+
+  # Candidate-scoped (candidate JWT required)
+  get "candidate/dashboard", to: "candidate_applications#index"
+  get "candidate/applications/:id", to: "candidate_applications#show"
+  post "candidate/applications", to: "candidate_applications#create"
+
+  # Current user profile (authenticated)
+  get "profile", to: "profiles#show"
+  patch "profile", to: "profiles#update"
+
   # Companies & company users
   resources :companies, only: %i[index show create update] do
     resources :users, only: %i[index create], controller: "company_users"

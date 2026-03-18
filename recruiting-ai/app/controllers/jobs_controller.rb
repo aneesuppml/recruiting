@@ -3,9 +3,12 @@
 class JobsController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_job, only: %i[show update destroy]
   before_action :authorize_job, only: %i[show update destroy]
+  before_action :require_can_view_jobs!, only: %i[index show]
+  before_action :require_can_manage_jobs!, only: %i[create update destroy]
 
   def index
     jobs = current_company.jobs
@@ -52,6 +55,6 @@ class JobsController < ApplicationController
   end
 
   def job_params
-    params.require(:job).permit(:title, :description, :status, :department, :location)
+    params.require(:job).permit(:title, :description, :status, :department, :location, :experience_level, :required_skills => [])
   end
 end

@@ -3,12 +3,18 @@
 class FeedbacksController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_feedback, only: %i[show update destroy]
   before_action :authorize_feedback, only: %i[show update destroy]
+  before_action :require_can_manage_feedback!, only: %i[index show create update destroy]
+  before_action :authorize_feedback_create, only: %i[create]
 
   def index
     interview = Interview.joins(application: :job).find_by!(id: params[:interview_id], jobs: { company_id: current_company.id })
+    if current_user.interviewer? && !current_user.admin? && !current_user.recruiter? && !current_user.hiring_manager?
+      return render json: { error: "Forbidden" }, status: :forbidden unless interview.interviewer_id == current_user.id
+    end
     feedbacks = interview.feedbacks
     render json: feedbacks
   end
@@ -45,10 +51,23 @@ class FeedbacksController < ApplicationController
     @feedback = Feedback.find(params[:id])
   end
 
+  def authorize_feedback_create
+    ensure_company!
+    interview = Interview.joins(application: :job).find_by(id: params[:feedback][:interview_id], jobs: { company_id: current_company.id })
+    return render json: { error: "Forbidden" }, status: :forbidden unless interview
+    if current_user.interviewer? && !current_user.admin? && !current_user.recruiter? && !current_user.hiring_manager?
+      return render json: { error: "Forbidden" }, status: :forbidden unless interview.interviewer_id == current_user.id
+    end
+  end
+
   def authorize_feedback
     ensure_company!
     job = @feedback.interview.application.job
-    render json: { error: "Forbidden" }, status: :forbidden unless job.company_id == current_company.id
+    return render json: { error: "Forbidden" }, status: :forbidden unless job.company_id == current_company.id
+    # Interviewer may only access feedback for their assigned interview
+    if current_user.interviewer? && !current_user.admin? && !current_user.recruiter? && !current_user.hiring_manager?
+      render json: { error: "Forbidden" }, status: :forbidden unless @feedback.interview.interviewer_id == current_user.id
+    end
   end
 
   def feedback_params

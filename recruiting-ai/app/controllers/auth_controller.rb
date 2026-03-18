@@ -35,7 +35,9 @@ class AuthController < ApplicationController
     {
       id: user.id,
       email: user.email,
-      company_id: user.company_id
+      name: user.name,
+      company_id: user.company_id,
+      roles: user.role_names
     }
   end
 end

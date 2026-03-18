@@ -3,9 +3,12 @@
 class CandidatesController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_candidate, only: %i[show update destroy]
   before_action :authorize_candidate, only: %i[show update destroy]
+  before_action :require_can_view_candidates!, only: %i[index show]
+  before_action :require_can_manage_candidates!, only: %i[create update destroy]
 
   def index
     candidates = current_company.candidates

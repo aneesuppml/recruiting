@@ -1,0 +1,12 @@
+Hello <%= @candidate.name %>,
+
+Your application for <%= @job.title %> at <%= @job.company.name %> has been updated.
+
+New status: <%= @status %>
+
+<% if @status == 'interview' %>
+  Check your candidate dashboard for interview details (date, time, meeting link).
+<% end %>
+
+Thank you,
+Recruiting Team

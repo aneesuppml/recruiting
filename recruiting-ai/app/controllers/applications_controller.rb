@@ -3,9 +3,13 @@
 class ApplicationsController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_application, only: %i[show update destroy]
   before_action :authorize_application, only: %i[show update destroy]
+  before_action :require_can_view_applications!, only: %i[index show]
+  before_action :require_can_manage_applications!, only: %i[create destroy]
+  before_action :require_can_update_application!, only: %i[update]
 
   def index
     scope = Application.joins(:job).where(jobs: { company_id: current_company.id })
@@ -56,6 +60,6 @@ class ApplicationsController < ApplicationController
   end
 
   def application_params
-    params.require(:application).permit(:job_id, :candidate_id, :status, :applied_at)
+    params.require(:application).permit(:job_id, :candidate_id, :status, :applied_at, :resume_url, :cover_note, :ai_score, :parsed_skills => [])
   end
 end

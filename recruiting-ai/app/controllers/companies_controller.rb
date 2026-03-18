@@ -3,9 +3,13 @@
 class CompaniesController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_company, only: %i[show update]
   before_action :authorize_company, only: %i[show update]
+  before_action :require_can_view_companies!, only: %i[index show]
+  before_action :require_can_create_company!, only: %i[create]
+  before_action :require_can_update_company!, only: %i[update]
 
   def index
     companies = current_user.admin? ? Company.all : Company.where(id: current_user.company_id)
@@ -52,7 +56,7 @@ class CompaniesController < ApplicationController
   end
 
   def ensure_default_roles
-    %w[Admin Recruiter Interviewer].each do |name|
+    %w[Admin Recruiter Hiring Manager Interviewer].each do |name|
       Role.find_or_create_by!(name: name)
     end
   end

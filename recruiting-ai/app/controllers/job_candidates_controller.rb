@@ -3,9 +3,11 @@
 class JobCandidatesController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_job
   before_action :authorize_job
+  before_action :require_can_view_jobs!
 
   def top_candidates
     application_ids = @job.applications.pluck(:id)

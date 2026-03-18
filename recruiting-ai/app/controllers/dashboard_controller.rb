@@ -3,6 +3,9 @@
 class DashboardController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
+
+  before_action :require_can_view_dashboard!
 
   def summary
     ensure_company!

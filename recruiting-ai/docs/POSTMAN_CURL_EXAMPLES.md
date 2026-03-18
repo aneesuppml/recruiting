@@ -27,6 +27,100 @@ curl -X POST http://localhost:3000/login \
 
 ---
 
+## Profile (current user)
+
+### Get profile
+
+```bash
+curl -X GET http://localhost:3000/profile \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+### Update profile (name / email)
+
+```bash
+curl -X PATCH http://localhost:3000/profile \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{"user":{"name":"Jane Doe","email":"jane@example.com"}}'
+```
+
+### Update password
+
+```bash
+curl -X PATCH http://localhost:3000/profile \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{"user":{"current_password":"secret123","password":"newsecret456","password_confirmation":"newsecret456"}}'
+```
+
+---
+
+## Candidate Auth (job seekers)
+
+Use the candidate token in `Authorization: Bearer <candidate_token>` for candidate-scoped endpoints.
+
+### Candidate signup
+
+```bash
+curl -X POST http://localhost:3000/candidate/signup \
+  -H "Content-Type: application/json" \
+  -d '{"candidate":{"name":"Jane Doe","email":"jane@example.com","phone":"+1234567890","password":"secret123","password_confirmation":"secret123","location":"Remote","skills":["Ruby","Rails"]}}'
+```
+
+### Candidate login
+
+```bash
+curl -X POST http://localhost:3000/candidate/login \
+  -H "Content-Type: application/json" \
+  -d '{"candidate":{"email":"jane@example.com","password":"secret123"}}'
+```
+
+---
+
+## Public Job Board (no auth)
+
+### List active jobs (with optional filters)
+
+```bash
+curl -X GET "http://localhost:3000/public/jobs?title=Engineer&location=Remote&skills=Ruby&experience_level=mid"
+```
+
+### Get job details
+
+```bash
+curl -X GET http://localhost:3000/public/jobs/1
+```
+
+---
+
+## Candidate applications (candidate token required)
+
+### My applications (dashboard)
+
+```bash
+curl -X GET http://localhost:3000/candidate/dashboard \
+  -H "Authorization: Bearer CANDIDATE_TOKEN"
+```
+
+### Apply for a job
+
+```bash
+curl -X POST http://localhost:3000/candidate/applications \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer CANDIDATE_TOKEN" \
+  -d '{"application":{"job_id":1,"resume_url":"https://example.com/resume.pdf","cover_note":"I am interested in this role."}}'
+```
+
+### Get application status (with interview details if scheduled)
+
+```bash
+curl -X GET http://localhost:3000/candidate/applications/1 \
+  -H "Authorization: Bearer CANDIDATE_TOKEN"
+```
+
+---
+
 ## Companies
 
 ### Create company

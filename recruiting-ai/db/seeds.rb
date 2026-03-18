@@ -12,10 +12,11 @@ if Rails.env.development? || Rails.env.test?
 end
 
 # Ensure default roles exist
-%w[Admin Recruiter Interviewer].each { |name| Role.find_or_create_by!(name: name) }
+%w[Admin Recruiter Hiring\ Manager Interviewer].each { |name| Role.find_or_create_by!(name: name) }
 
 admin_role = Role.find_by!(name: "Admin")
 recruiter_role = Role.find_by!(name: "Recruiter")
+hiring_manager_role = Role.find_by!(name: "Hiring Manager")
 interviewer_role = Role.find_by!(name: "Interviewer")
 
 ActiveRecord::Base.transaction do
@@ -33,10 +34,12 @@ ActiveRecord::Base.transaction do
     users_by_company[company.id] = {
       admin: nil,
       recruiters: [],
+      hiring_managers: [],
       interviewers: []
     }
 
     admin = User.create!(
+      name: Faker::Name.name,
       email: "admin_#{company.id}_#{Faker::Internet.unique.email(domain: company.domain)}",
       password: SEED_PASSWORD,
       password_confirmation: SEED_PASSWORD,
@@ -47,6 +50,7 @@ ActiveRecord::Base.transaction do
 
     2.times do
       u = User.create!(
+        name: Faker::Name.name,
         email: "recruiter_#{company.id}_#{Faker::Internet.unique.email(domain: company.domain)}",
         password: SEED_PASSWORD,
         password_confirmation: SEED_PASSWORD,
@@ -56,8 +60,21 @@ ActiveRecord::Base.transaction do
       users_by_company[company.id][:recruiters] << u
     end
 
+    1.times do
+      u = User.create!(
+        name: Faker::Name.name,
+        email: "hm_#{company.id}_#{Faker::Internet.unique.email(domain: company.domain)}",
+        password: SEED_PASSWORD,
+        password_confirmation: SEED_PASSWORD,
+        company_id: company.id
+      )
+      Membership.create!(user: u, role: hiring_manager_role)
+      users_by_company[company.id][:hiring_managers] << u
+    end
+
     2.times do
       u = User.create!(
+        name: Faker::Name.name,
         email: "interviewer_#{company.id}_#{Faker::Internet.unique.email(domain: company.domain)}",
         password: SEED_PASSWORD,
         password_confirmation: SEED_PASSWORD,
@@ -78,6 +95,8 @@ ActiveRecord::Base.transaction do
   ]
   departments = %w[Engineering Product Design Data Operations]
   locations = ["Remote", "New York, NY", "San Francisco, CA", "Austin, TX", "Chicago, IL"]
+  experience_levels = %w[entry mid senior]
+  skills_pool = %w[Ruby Rails React JavaScript TypeScript Python SQL AWS Docker Kubernetes Go Node]
 
   jobs_by_company = Hash.new { |h, k| h[k] = [] }
   companies.each do |company|
@@ -91,13 +110,15 @@ ActiveRecord::Base.transaction do
         department: departments.sample,
         location: locations.sample,
         company_id: company.id,
-        created_by_id: company_users.sample.id
+        created_by_id: company_users.sample.id,
+        experience_level: experience_levels.sample,
+        required_skills: skills_pool.sample(rand(2..5))
       )
       jobs_by_company[company.id] << job
     end
   end
 
-  # --- 4. Candidates: 50 total, distributed across companies ---
+  # --- 4. Candidates: 50 recruiter-created (with company_id) + 3 external (company_id nil, with password for candidate login) ---
   candidate_statuses = %w[new screening interview offer hired rejected]
   counts_per_company = [17, 17, 16]
   all_candidates = []
@@ -114,36 +135,60 @@ ActiveRecord::Base.transaction do
         status: candidate_statuses.sample,
         company_id: company.id,
         resume_text: Faker::Lorem.paragraph(sentence_count: 3),
-        skills: Faker::Lorem.words(number: rand(3..8)),
-        ai_match_score: rand(50..100)
+        skills: skills_pool.sample(rand(3..6)),
+        ai_match_score: rand(50..100),
+        location: locations.sample
       )
       all_candidates << c
     end
   end
 
-  # --- 5. Applications: each candidate applies to 1–3 jobs (same company) ---
-  application_statuses = %w[applied screening interview offer hired rejected]
+  # External candidates (can log in at /candidate/login)
+  %w[candidate1@example.com candidate2@example.com candidate3@example.com].each do |email|
+    all_candidates << Candidate.create!(
+      name: Faker::Name.unique.name,
+      email: email,
+      phone: Faker::PhoneNumber.phone_number,
+      company_id: nil,
+      status: "new",
+      password: SEED_PASSWORD,
+      password_confirmation: SEED_PASSWORD,
+      location: locations.sample,
+      skills: skills_pool.sample(rand(2..4))
+    )
+  end
+
+  # --- 5. Applications: recruiter-created candidates apply to 1–3 jobs (same company); external candidates apply to 1–2 jobs ---
+  application_statuses = %w[applied screening shortlisted interview under_review offer hired rejected]
   applications_in_interview = []
 
   all_candidates.each do |candidate|
-    company_jobs = jobs_by_company[candidate.company_id]
-    num_apps = rand(1..3)
+    company_id = candidate.company_id
+    company_jobs = company_id ? jobs_by_company[company_id] : jobs_by_company.values.flatten
+    next if company_jobs.empty?
+
+    num_apps = company_id ? rand(1..3) : rand(1..2)
     jobs_to_apply = company_jobs.sample([num_apps, company_jobs.size].min)
+    recruiter_id = company_id ? users_by_company[company_id][:recruiters].sample.id : nil
+
     jobs_to_apply.each do |job|
-      recruiters = users_by_company[candidate.company_id][:recruiters]
       app = Application.create!(
         candidate_id: candidate.id,
         job_id: job.id,
-        user_id: recruiters.sample.id,
+        user_id: recruiter_id,
         status: application_statuses.sample,
-        applied_at: Faker::Time.between(from: 30.days.ago, to: Time.current)
+        applied_at: Faker::Time.between(from: 30.days.ago, to: Time.current),
+        resume_url: candidate.resume_url,
+        cover_note: Faker::Lorem.sentence(word_count: 8),
+        ai_score: rand(40..98),
+        parsed_skills: candidate.skills
       )
       applications_in_interview << app if app.status == "interview"
     end
   end
 
   # --- 6. Interviews: for applications with status "interview" ---
-  round_types = %w[screening technical hr]
+  round_types = %w[phone screening technical behavioral hr final]
   interview_statuses = %w[scheduled completed completed completed completed cancelled]
 
   interviews_completed = []
@@ -156,7 +201,8 @@ ActiveRecord::Base.transaction do
       round_type: round_types.sample,
       interviewer_id: interviewers.sample.id,
       scheduled_at: Faker::Time.between(from: 7.days.ago, to: 7.days.from_now),
-      status: status
+      status: status,
+      meeting_link: ["https://zoom.us/j/#{rand(100_000_000..999_999_999)}", "https://meet.google.com/#{Faker::Alphanumeric.alpha(number: 3)}-#{Faker::Alphanumeric.alpha(number: 4)}-#{Faker::Alphanumeric.alpha(number: 3)}"].sample
     )
     interviews_completed << int if status == "completed"
   end
@@ -179,3 +225,4 @@ end
 Faker::UniqueGenerator.clear
 
 puts "Seeded: #{Company.count} companies, #{User.count} users, #{Job.count} jobs, #{Candidate.count} candidates, #{Application.count} applications, #{Interview.count} interviews, #{Feedback.count} feedbacks."
+puts "Candidate login (external): candidate1@example.com, candidate2@example.com, candidate3@example.com — password: #{SEED_PASSWORD}"

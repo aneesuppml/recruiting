@@ -3,8 +3,10 @@
 class CompanyUsersController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_company
+  before_action :require_can_manage_company_users!
   before_action :authorize_company
 
   def index
@@ -39,7 +41,7 @@ class CompanyUsersController < ApplicationController
   def assign_role(user, role_name)
     return unless role_name.present?
     role = Role.find_by(name: role_name)
-    Membership.create!(user: user, role: role) if role && %w[Admin Recruiter Interviewer].include?(role_name)
+    Membership.create!(user: user, role: role) if role && ["Admin", "Recruiter", "Hiring Manager", "Interviewer"].include?(role_name)
   end
 
   def user_json(user)

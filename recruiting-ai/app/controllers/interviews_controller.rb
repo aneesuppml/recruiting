@@ -3,14 +3,22 @@
 class InterviewsController < ApplicationController
   include Authenticatable
   include CompanyScope
+  include Authorizable
 
   before_action :set_interview, only: %i[show update destroy]
   before_action :authorize_interview, only: %i[show update destroy]
+  before_action :require_can_view_interviews!, only: %i[index show]
+  before_action :require_can_manage_interviews!, only: %i[create update destroy]
+  before_action :require_interviewer_assigned_for_show!, only: %i[show]
 
   def index
     scope = Interview.joins(application: :job).where(jobs: { company_id: current_company.id })
     scope = scope.where(application_id: params[:application_id]) if params[:application_id].present?
-    scope = scope.where(interviewer_id: current_user.id) if params[:mine].present?
+    if current_user.interviewer? && !current_user.admin? && !current_user.recruiter? && !current_user.hiring_manager?
+      scope = scope.where(interviewer_id: current_user.id)
+    else
+      scope = scope.where(interviewer_id: current_user.id) if params[:mine].present?
+    end
     render json: scope
   end
 
@@ -44,6 +52,10 @@ class InterviewsController < ApplicationController
 
   def set_interview
     @interview = Interview.find(params[:id])
+  end
+
+  def require_interviewer_assigned_for_show!
+    require_interviewer_assigned_to!(@interview)
   end
 
   def authorize_interview
