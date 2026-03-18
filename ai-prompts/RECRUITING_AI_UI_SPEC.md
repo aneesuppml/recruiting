@@ -231,6 +231,7 @@ Super Admin uses a separate layout and header:
   - **Company Details**: `company_name`, required unique `domain`, optional `company_size`, optional `industry`, full address (`address_line1`, optional `address_line2`, `city`, `state`, `country`, `postal_code`), and contact info (`contact_email`, `contact_phone`)
   - **Admin User Details**: `name`, `email`, `password`, `password_confirmation`
 - After `POST /signup`, the backend creates a tenant `Company` in `pending` status and assigns the registering user the **Admin** role.
+- **UI layout:** uses the shared modern auth layout with `ProductHeader` on top and a single wide signup form card (no left-side panel) to reduce scrolling (blue/white/dark-grey theme).
 
 **On login:** store JWT token in localStorage, update auth context, then redirect to:
 - `/dashboard` when the user’s `company_status` is `active`
@@ -275,6 +276,7 @@ New tenant onboarding behavior:
 **Separate from recruiter auth:** Use **CandidateAuthContext** (storage keys `candidateToken`, `candidate`). Use **candidateApi.js** (Axios instance that sends candidate token) for candidate-scoped endpoints. Do not mix recruiter and candidate tokens.
 
 **Pages:** CandidateLogin.jsx, CandidateSignup.jsx, JobBoard.jsx, JobDetails.jsx, ApplyJob.jsx, CandidateDashboard.jsx, ApplicationStatus.jsx.
+- `CandidateSignup.jsx` uses the same modern auth look but as a single-column wide signup form card under `ProductHeader` (no left-side panel) to reduce scrolling.
 
 **Routes:** /candidate/jobs (public job board), /candidate/jobs/:id (job details), /candidate/login, /candidate/signup, /candidate/dashboard (protected), /candidate/applications/:id (protected), /candidate/apply/:jobId (protected).
 

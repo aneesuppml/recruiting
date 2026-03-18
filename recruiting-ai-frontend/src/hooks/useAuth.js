@@ -61,7 +61,7 @@ export function useAuth() {
       } else if (data?.pending) {
         navigate("/pending-approval");
       } else {
-        navigate("/login");
+        navigate("/login/internal");
       }
       return data;
     } catch (err) {
@@ -102,7 +102,7 @@ export function useAuth() {
 
   const logout = () => {
     doLogout();
-    navigate("/login");
+    navigate("/");
   };
 
   return { signup, login, logout, loading, error, setError };

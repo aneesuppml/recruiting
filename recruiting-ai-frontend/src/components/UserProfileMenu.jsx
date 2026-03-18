@@ -36,7 +36,7 @@ export function UserProfileMenu() {
   const handleLogout = () => {
     setOpen(false);
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   const handleNav = (path) => {

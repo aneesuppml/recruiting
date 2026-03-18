@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuthContext } from "./context/AuthContext";
 import { getDefaultPathForUser } from "./lib/permissions";
-import { CandidateAuthProvider } from "./context/CandidateAuthContext";
+import { CandidateAuthProvider, useCandidateAuthContext } from "./context/CandidateAuthContext";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { RoleProtectedRoute } from "./components/RoleProtectedRoute";
 import { CandidateProtectedRoute } from "./components/CandidateProtectedRoute";
@@ -36,6 +36,7 @@ import { SuperAdminCompanies } from "./pages/super-admin/SuperAdminCompanies";
 import { SuperAdminUsers } from "./pages/super-admin/SuperAdminUsers";
 import { SuperAdminAnalytics } from "./pages/super-admin/SuperAdminAnalytics";
 import { Profile as RecruiterProfile } from "./pages/Profile";
+import { ProductLanding } from "./pages/ProductLanding";
 
 function Layout({ children }) {
   return (
@@ -56,11 +57,28 @@ function PublicRoute({ children }) {
   return children;
 }
 
-function HomeRedirect() {
+function RootRoute() {
   const { isAuthenticated, loading, user } = useAuthContext();
-  if (loading) return <div className="flex min-h-screen items-center justify-center bg-white"><div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" /></div>;
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+      </div>
+    );
+  if (!isAuthenticated) return <ProductLanding />;
   return <Navigate to={getDefaultPathForUser(user)} replace />;
+}
+
+function CandidatePublicRoute({ children }) {
+  const { isCandidateAuthenticated, loading } = useCandidateAuthContext();
+  if (loading)
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-white">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-blue-600 border-t-transparent" />
+      </div>
+    );
+  if (isCandidateAuthenticated) return <Navigate to="/candidate/dashboard" replace />;
+  return children;
 }
 
 export default function App() {
@@ -142,8 +160,13 @@ export default function App() {
             />
 
             {/* Recruiter/internal */}
-            <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-          <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+            <Route path="/login" element={<Navigate to="/" replace />} />
+            <Route path="/login/internal" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route
+              path="/login/candidate"
+              element={<CandidatePublicRoute><CandidateLogin /></CandidatePublicRoute>}
+            />
+            <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
           <Route
             path="/pending-approval"
             element={
@@ -286,8 +309,8 @@ export default function App() {
               </ProtectedRoute>
             }
           />
-            <Route path="/" element={<HomeRedirect />} />
-            <Route path="*" element={<HomeRedirect />} />
+            <Route path="/" element={<RootRoute />} />
+            <Route path="*" element={<RootRoute />} />
           </Routes>
         </CandidateAuthProvider>
       </AuthProvider>
