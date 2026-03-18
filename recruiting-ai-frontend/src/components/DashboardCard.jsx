@@ -12,7 +12,7 @@ export function DashboardCard({ title, value, subtitle, icon, trend }) {
             </p>
           )}
         </div>
-        {icon && <div className="text-2xl opacity-80">{icon}</div>}
+        {icon && <div className="flex h-9 w-9 items-center justify-center text-gray-500 [&_svg]:h-7 [&_svg]:w-7">{icon}</div>}
       </div>
     </div>
   );

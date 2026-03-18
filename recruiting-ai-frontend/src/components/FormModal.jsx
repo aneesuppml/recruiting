@@ -1,3 +1,5 @@
+import { X } from "lucide-react";
+
 export function FormModal({ open, onClose, title, children }) {
   if (!open) return null;
   return (
@@ -12,7 +14,7 @@ export function FormModal({ open, onClose, title, children }) {
             className="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
             aria-label="Close"
           >
-            ✕
+            <X className="h-5 w-5" aria-hidden />
           </button>
         </div>
         {children}

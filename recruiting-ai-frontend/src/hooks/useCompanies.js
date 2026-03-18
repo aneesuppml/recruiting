@@ -48,8 +48,13 @@ export function useCompanies() {
       setUsers(Array.isArray(data) ? data : []);
       return data;
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to fetch users");
-      throw err;
+      const message =
+        err.response?.status === 403
+          ? "You don't have permission to view users for this company. Only Admins and Recruiters can."
+          : err.response?.data?.error || "Failed to fetch users";
+      setError(message);
+      setUsers([]);
+      return [];
     } finally {
       setLoading(false);
     }

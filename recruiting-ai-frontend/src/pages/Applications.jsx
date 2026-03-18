@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useApplications } from "../hooks/useApplications";
 import { useJobs } from "../hooks/useJobs";
 import { useCandidates } from "../hooks/useCandidates";
+import { usePermissions } from "../hooks/usePermissions";
 import { DataTable } from "../components/DataTable";
 import { StatusBadge } from "../components/StatusBadge";
 import { FormModal } from "../components/FormModal";
@@ -12,6 +13,7 @@ export function Applications() {
   const { applications, loading, error, createApplication, updateApplication, setError } = useApplications();
   const { jobs } = useJobs();
   const { candidates } = useCandidates();
+  const { canManageApplications, canUpdateApplication } = usePermissions();
   const [modalOpen, setModalOpen] = useState(false);
   const [filterStatus, setFilterStatus] = useState("");
   const [form, setForm] = useState({ job_id: "", candidate_id: "", status: "applied" });
@@ -47,27 +49,31 @@ export function Applications() {
       label: "Applied",
       render: (row) => (row.applied_at ? new Date(row.applied_at).toLocaleDateString() : "—"),
     },
-    {
-      key: "actions",
-      label: "Update status",
-      render: (row) => (
-        <select
-          value={row.status}
-          onChange={(e) => {
-            setUpdating(row.id);
-            handleStatusChange(row, e.target.value);
-          }}
-          disabled={updating === row.id}
-          className="rounded border border-gray-300 text-sm"
-        >
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      ),
-    },
+    ...(canUpdateApplication
+      ? [
+          {
+            key: "actions",
+            label: "Update status",
+            render: (row) => (
+              <select
+                value={row.status}
+                onChange={(e) => {
+                  setUpdating(row.id);
+                  handleStatusChange(row, e.target.value);
+                }}
+                disabled={updating === row.id}
+                className="rounded border border-gray-300 text-sm"
+              >
+                {STATUSES.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -87,13 +93,15 @@ export function Applications() {
               </option>
             ))}
           </select>
-          <button
-            type="button"
-            onClick={() => setModalOpen(true)}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-          >
-            Add application
-          </button>
+          {canManageApplications && (
+            <button
+              type="button"
+              onClick={() => setModalOpen(true)}
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+            >
+              Add application
+            </button>
+          )}
         </div>
       </div>
       {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}

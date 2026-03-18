@@ -50,7 +50,15 @@ export function AuthProvider({ children }) {
     window.dispatchEvent(new Event("auth-change"));
   };
 
-  const value = { user, token, loading, login, logout, isAuthenticated: !!token };
+  const updateUser = (userData) => {
+    if (!userData) return;
+    const stored = JSON.stringify(userData);
+    localStorage.setItem("user", stored);
+    setUser(userData);
+    window.dispatchEvent(new Event("auth-change"));
+  };
+
+  const value = { user, token, loading, login, logout, updateUser, isAuthenticated: !!token };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 

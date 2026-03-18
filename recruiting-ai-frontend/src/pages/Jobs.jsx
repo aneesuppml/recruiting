@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useJobs } from "../hooks/useJobs";
+import { usePermissions } from "../hooks/usePermissions";
 import { DataTable } from "../components/DataTable";
 import { StatusBadge } from "../components/StatusBadge";
 import { FormModal } from "../components/FormModal";
@@ -8,6 +9,7 @@ const defaultJob = { title: "", description: "", status: "draft", department: ""
 
 export function Jobs() {
   const { jobs, loading, error, createJob, updateJob, deleteJob, setError } = useJobs();
+  const { canManageJobs } = usePermissions();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(defaultJob);
@@ -55,31 +57,37 @@ export function Jobs() {
     { key: "department", label: "Department" },
     { key: "location", label: "Location" },
     { key: "status", label: "Status", render: (row) => <StatusBadge status={row.status} /> },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (row) => (
-        <div className="flex gap-2">
-          <button type="button" onClick={() => openEdit(row)} className="text-indigo-600 hover:underline">
-            Edit
-          </button>
-          {row.status !== "closed" && (
-            <button type="button" onClick={() => handleCloseJob(row)} className="text-red-600 hover:underline">
-              Close
-            </button>
-          )}
-        </div>
-      ),
-    },
+    ...(canManageJobs
+      ? [
+          {
+            key: "actions",
+            label: "Actions",
+            render: (row) => (
+              <div className="flex gap-2">
+                <button type="button" onClick={() => openEdit(row)} className="text-indigo-600 hover:underline">
+                  Edit
+                </button>
+                {row.status !== "closed" && (
+                  <button type="button" onClick={() => handleCloseJob(row)} className="text-red-600 hover:underline">
+                    Close
+                  </button>
+                )}
+              </div>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Jobs</h1>
-        <button type="button" onClick={openCreate} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
-          Create job
-        </button>
+        {canManageJobs && (
+          <button type="button" onClick={openCreate} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+            Create job
+          </button>
+        )}
       </div>
       {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {loading && !jobs.length ? (

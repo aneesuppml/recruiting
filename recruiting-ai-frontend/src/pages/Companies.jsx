@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useCompanies } from "../hooks/useCompanies";
+import { usePermissions } from "../hooks/usePermissions";
 import { DataTable } from "../components/DataTable";
 import { FormModal } from "../components/FormModal";
 
 export function Companies() {
   const { companies, loading, error, createCompany, setError } = useCompanies();
+  const { canCreateCompany } = usePermissions();
   const [modalOpen, setModalOpen] = useState(false);
   const [name, setName] = useState("");
   const [domain, setDomain] = useState("");
@@ -29,13 +31,15 @@ export function Companies() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Companies</h1>
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          Create company
-        </button>
+        {canCreateCompany && (
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Create company
+          </button>
+        )}
       </div>
       {error && (
         <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700" onAnimationEnd={() => setError(null)}>

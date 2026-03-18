@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCandidates } from "../hooks/useCandidates";
+import { usePermissions } from "../hooks/usePermissions";
 import { DataTable } from "../components/DataTable";
 import { StatusBadge } from "../components/StatusBadge";
 import { FormModal } from "../components/FormModal";
@@ -8,6 +9,7 @@ const defaultCandidate = { name: "", email: "", phone: "", resume_url: "", linke
 
 export function Candidates() {
   const { candidates, loading, error, createCandidate, updateCandidate, setError } = useCandidates();
+  const { canManageCandidates } = usePermissions();
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(defaultCandidate);
@@ -66,24 +68,30 @@ export function Candidates() {
       render: (row) => (row.ai_match_score != null ? `${row.ai_match_score}%` : "—"),
     },
     { key: "status", label: "Status", render: (row) => <StatusBadge status={row.status} /> },
-    {
-      key: "actions",
-      label: "Actions",
-      render: (row) => (
-        <button type="button" onClick={() => openEdit(row)} className="text-indigo-600 hover:underline">
-          Edit
-        </button>
-      ),
-    },
+    ...(canManageCandidates
+      ? [
+          {
+            key: "actions",
+            label: "Actions",
+            render: (row) => (
+              <button type="button" onClick={() => openEdit(row)} className="text-indigo-600 hover:underline">
+                Edit
+              </button>
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Candidates</h1>
-        <button type="button" onClick={openCreate} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
-          Add candidate
-        </button>
+        {canManageCandidates && (
+          <button type="button" onClick={openCreate} className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+            Add candidate
+          </button>
+        )}
       </div>
       {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {loading && !candidates.length ? (

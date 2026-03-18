@@ -23,7 +23,8 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthRequest = error.config?.url?.includes("/login") || error.config?.url?.includes("/signup");
+    if (error.response?.status === 401 && !isAuthRequest) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       window.dispatchEvent(new Event("auth-change"));

@@ -22,7 +22,7 @@ export function useAuth() {
     } catch (err) {
       const msg = err.response?.data?.errors?.join?.(" ") || err.response?.data?.error || "Signup failed";
       setError(msg);
-      throw err;
+      return null;
     } finally {
       setLoading(false);
     }
@@ -41,7 +41,7 @@ export function useAuth() {
     } catch (err) {
       const msg = err.response?.data?.error || "Invalid email or password";
       setError(msg);
-      throw err;
+      return null;
     } finally {
       setLoading(false);
     }

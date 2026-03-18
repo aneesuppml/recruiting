@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useInterviews } from "../hooks/useInterviews";
 import { useApplications } from "../hooks/useApplications";
 import { useCompanies } from "../hooks/useCompanies";
+import { usePermissions } from "../hooks/usePermissions";
 import { DataTable } from "../components/DataTable";
 import { StatusBadge } from "../components/StatusBadge";
 import { FormModal } from "../components/FormModal";
@@ -13,6 +14,7 @@ export function Interviews() {
   const { interviews, loading, error, createInterview, updateInterview, setError } = useInterviews();
   const { applications } = useApplications();
   const { users } = useCompanies();
+  const { canManageInterviews } = usePermissions();
   const [modalOpen, setModalOpen] = useState(false);
   const [form, setForm] = useState({
     application_id: "",
@@ -53,13 +55,15 @@ export function Interviews() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold text-gray-900">Interviews</h1>
-        <button
-          type="button"
-          onClick={() => setModalOpen(true)}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-        >
-          Schedule interview
-        </button>
+        {canManageInterviews && (
+          <button
+            type="button"
+            onClick={() => setModalOpen(true)}
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+          >
+            Schedule interview
+          </button>
+        )}
       </div>
       {error && <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>}
       {loading && !interviews.length ? (

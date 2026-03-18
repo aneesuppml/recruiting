@@ -1,5 +1,6 @@
 import { useDashboard } from "../hooks/useDashboard";
 import { DashboardCard } from "../components/DashboardCard";
+import { Briefcase, CircleCheck, User, ClipboardList } from "lucide-react";
 
 export function Dashboard() {
   const { summary, pipeline, reports, loading, error } = useDashboard();
@@ -24,10 +25,10 @@ export function Dashboard() {
     <div className="space-y-6">
       <h1 className="text-2xl font-semibold text-gray-900">Dashboard</h1>
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <DashboardCard title="Total Jobs" value={summary?.total_jobs ?? "—"} icon="💼" />
-        <DashboardCard title="Active Jobs" value={summary?.active_jobs ?? "—"} icon="✅" />
-        <DashboardCard title="Total Candidates" value={summary?.total_candidates ?? "—"} icon="👤" />
-        <DashboardCard title="Total Applications" value={summary?.total_applications ?? "—"} icon="📋" />
+        <DashboardCard title="Total Jobs" value={summary?.total_jobs ?? "—"} icon={<Briefcase />} />
+        <DashboardCard title="Active Jobs" value={summary?.active_jobs ?? "—"} icon={<CircleCheck />} />
+        <DashboardCard title="Total Candidates" value={summary?.total_candidates ?? "—"} icon={<User />} />
+        <DashboardCard title="Total Applications" value={summary?.total_applications ?? "—"} icon={<ClipboardList />} />
       </div>
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
