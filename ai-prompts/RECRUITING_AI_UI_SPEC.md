@@ -10,7 +10,7 @@ Build a React Admin UI for the recruiting-ai platform.
 - Backend: `recruiting-ai-backend`
 - Frontend: `recruiting-ai-frontend`
 
-**Docker (optional):** From the **parent folder** that contains **`docker-compose.yml`**, run `docker compose up --build` (see **Docker Compose** below). The UI in the browser stays at **`http://localhost:5173`**; the API is reachable at **`http://localhost:3000`** or via the Vite **`/api`** proxy when using the Compose frontend service. Root **`README.md`** documents the full stack, env vars, **`make console`** (Rails console for the backend), and common Compose commands. **`recruiting-ai-frontend/docker-compose.yml`** includes the root stack with **`name: recruiting-ai`** so Compose from this folder keeps the project name **`recruiting-ai`**.
+**Docker (optional):** From the **parent folder** that contains **`docker-compose.yml`**, run `docker compose up --build` (see **Docker Compose** below). The UI in the browser stays at **`http://localhost:5173`**; the API is reachable at **`http://localhost:3000`** or via the Vite **`/api`** proxy when using the Compose frontend service. Root **`README.md`** documents the full stack, env vars, **`make start`** / **`make stop`** / **`make up`** / **`make logs`** / **`make restart`**, and **`make console`** (Rails console). **`recruiting-ai-frontend/docker-compose.yml`** includes the root stack with **`name: recruiting-ai`** so Compose from this folder keeps the project name **`recruiting-ai`**.
 
 The backend is a Rails 7 API with the following modules:
 
@@ -37,7 +37,7 @@ The UI should consume these APIs and act as an internal recruiting dashboard sim
 - **Frontend service env:** `VITE_DOCKER=true`, `VITE_API_URL` default `http://localhost:5173/api`, `VITE_PROXY_TARGET=http://backend:3000`.
 - **`vite.config.js`:** Read **`VITE_DOCKER`** and **`VITE_PROXY_TARGET`** via **`import { env } from 'node:process'`** (avoids ESLint `process` undefined when the config is linted with browser globals). When `env.VITE_DOCKER === 'true'`, enable **`server.proxy['/api']`** → backend, with **`rewrite`** to remove the `/api` prefix so Rails routes stay **`/login`**, **`/jobs`**, etc.
 - **Root env:** Copy **`.env.example`** to **`.env`**; **`COMPOSE_PROJECT_NAME=recruiting-ai`**; optional **`POSTGRES_PORT` / `BACKEND_PORT` / `FRONTEND_PORT`** if ports clash.
-- **Docs / tooling:** Root **`README.md`** (quick start, URLs, env, ports, **`make console`** for Rails); root **`Makefile`** targets backend console.
+- **Docs / tooling:** Root **`README.md`** (quick start, URLs, env, ports); root **`Makefile`**: **`make start`**, **`stop`**, **`up`**, **`logs`**, **`restart`**, **`console`**.
 
 ---
 
@@ -490,4 +490,4 @@ Design the UI similar to a modern ATS recruiting dashboard used by recruiting te
 
 ---
 
-*Last updated: Root `README.md` + `Makefile`; wrapper compose `name: recruiting-ai` + `include`; Docker + Vite `/api` proxy (`VITE_DOCKER`, `VITE_API_URL=http://localhost:5173/api`, `node:process` `env` in `vite.config.js`); Super Admin module; RBAC (`RoleProtectedRoute`, `SuperAdminRoute`); `CompanySwitcher` + `X-Company-ID`; pending gating; candidate `GET /candidate/jobs` / `GET /candidate/jobs/:id`; blue/white/dark-grey theme.*
+*Last updated: Root `README.md` + `Makefile` (`make start`/`stop`/`up`/`logs`/`restart`/`console`); wrapper compose `name: recruiting-ai` + `include`; Docker + Vite `/api` proxy (`VITE_DOCKER`, `VITE_API_URL=http://localhost:5173/api`, `node:process` `env` in `vite.config.js`); Super Admin module; RBAC (`RoleProtectedRoute`, `SuperAdminRoute`); `CompanySwitcher` + `X-Company-ID`; pending gating; candidate `GET /candidate/jobs` / `GET /candidate/jobs/:id`; blue/white/dark-grey theme.*

@@ -10,7 +10,7 @@ Create a new Rails API-only project for a recruiting platform.
 
 **Repo folder name (this workspace):** `recruiting-ai-backend` (backend) and `recruiting-ai-frontend` (frontend).
 
-**Docker (optional):** A root-level **`docker-compose.yml`** (project name **`recruiting-ai`**) runs PostgreSQL, the Rails API, and the Vite dev server together. **`recruiting-ai-backend/docker-compose.yml`** and **`recruiting-ai-frontend/docker-compose.yml`** each set **`name: recruiting-ai`** and **`include`** the root file so `docker compose` run from those subfolders does not rename the project to the folder name. Container names: **`recruiting-ai-db`**, **`recruiting-ai-backend`**, **`recruiting-ai-frontend`**; network **`recruiting-ai-network`**; service DNS names inside Compose remain **`db`**, **`backend`**, **`frontend`**. Root **`README.md`** documents start/stop, env, ports, and **`make console`** (Rails console). Copy **`.env.example`** to **`.env`** at the repo root and run `docker compose up --build`. See **Docker Compose (development)** below.
+**Docker (optional):** A root-level **`docker-compose.yml`** (project name **`recruiting-ai`**) runs PostgreSQL, the Rails API, and the Vite dev server together. **`recruiting-ai-backend/docker-compose.yml`** and **`recruiting-ai-frontend/docker-compose.yml`** each set **`name: recruiting-ai`** and **`include`** the root file so `docker compose` run from those subfolders does not rename the project to the folder name. Container names: **`recruiting-ai-db`**, **`recruiting-ai-backend`**, **`recruiting-ai-frontend`**; network **`recruiting-ai-network`**; service DNS names inside Compose remain **`db`**, **`backend`**, **`frontend`**. Root **`README.md`** documents env, ports, **`make start`** / **`make stop`** / **`make up`** / **`make logs`** / **`make restart`**, and **`make console`** (Rails console). Copy **`.env.example`** to **`.env`** at the repo root and run **`make start`** or `docker compose up --build`. See **Docker Compose (development)** below.
 
 **Target stack:**
 - Ruby 3.1.x
@@ -385,7 +385,7 @@ The **workspace root** (parent of `recruiting-ai-backend` and `recruiting-ai-fro
 
 **Wrapper compose files:** **`recruiting-ai-backend/docker-compose.yml`** and **`recruiting-ai-frontend/docker-compose.yml`** declare **`name: recruiting-ai`** and **`include: ../docker-compose.yml`** so developers can run `docker compose exec …` from either app folder without Compose defaulting the project name to `recruiting-ai-backend` or `recruiting-ai-frontend`.
 
-**Rails console (Docker):** From the repo root, **`make console`** (see root **`Makefile`**) runs `docker compose exec backend bin/rails console`. The database host is the Compose service **`db`**; use Compose exec (or `make console`), not ad hoc `docker exec`, unless the backend container is confirmed attached to **`recruiting-ai-network`**. See root **`README.md`** for troubleshooting if hostname **`db`** does not resolve.
+**Rails console (Docker):** From the repo root, **`make console`** (see root **`Makefile`**) runs `docker compose exec backend bin/rails console`. **`make start`** runs `docker compose up -d --build`; **`make stop`** runs `docker compose down`; **`make up`** runs the stack in the foreground; **`make logs`** tails logs; **`make restart`** stops then starts. The database host is the Compose service **`db`**; use Compose exec (or `make console`), not ad hoc `docker exec`, unless the backend container is confirmed attached to **`recruiting-ai-network`**. See root **`README.md`** for troubleshooting if hostname **`db`** does not resolve.
 
 **Services:**
 - **`db`** — PostgreSQL 16 (`recruiting-ai-db`), healthcheck via `pg_isready`, port `${POSTGRES_PORT:-5432}:5432`.
@@ -424,7 +424,7 @@ cp .env.example .env   # optional
 docker compose up --build
 ```
 
-See the repository root **`README.md`** for URLs, environment variables, **`make console`** (Rails console), and troubleshooting.
+See the repository root **`README.md`** for URLs, environment variables, **`make start`** / **`stop`** / **`up`** / **`logs`** / **`restart`** / **`console`**, and troubleshooting.
 
 ---
 
@@ -480,4 +480,4 @@ Generate seed data that populates realistic sample data for all models.
 
 ---
 
-*Last updated: Root `README.md` + `Makefile` (`make console`); wrapper `docker-compose.yml` in backend/frontend with `name: recruiting-ai` + `include`; Docker Compose (`name: recruiting-ai`, containers `recruiting-ai-*`, network/volumes `recruiting-ai-*`); backend `DATABASE_HOST`/Postgres env, `CORS_ORIGINS`, `SECRET_KEY_BASE`, `bin/docker-entrypoint-dev`, `Dockerfile` + `Dockerfile.production`; seeds FK-safe clear for `admin_user_id`/`company_id`. RBAC via `Authorizable`; `X-Company-ID`; pending restrictions; candidate jobs `GET /candidate/jobs` and `GET /candidate/jobs/:id`.*
+*Last updated: Root `README.md` + `Makefile` (`make start`/`stop`/`up`/`logs`/`restart`/`console`); wrapper `docker-compose.yml` in backend/frontend with `name: recruiting-ai` + `include`; Docker Compose (`name: recruiting-ai`, containers `recruiting-ai-*`, network/volumes `recruiting-ai-*`); backend `DATABASE_HOST`/Postgres env, `CORS_ORIGINS`, `SECRET_KEY_BASE`, `bin/docker-entrypoint-dev`, `Dockerfile` + `Dockerfile.production`; seeds FK-safe clear for `admin_user_id`/`company_id`. RBAC via `Authorizable`; `X-Company-ID`; pending restrictions; candidate jobs `GET /candidate/jobs` and `GET /candidate/jobs/:id`.*

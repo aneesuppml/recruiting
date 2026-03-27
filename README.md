@@ -24,8 +24,16 @@ From the **repository root** (next to `docker-compose.yml`):
 
 ```bash
 cp .env.example .env    # optional; defaults work for local dev
-docker compose up --build
+make start              # background: docker compose up -d --build
 ```
+
+Or attach in the foreground (logs in the terminal; **Ctrl+C** stops the stack):
+
+```bash
+make up                 # docker compose up --build
+```
+
+Or use Compose directly: `docker compose up --build`.
 
 First boot runs migrations and seeds. Ensure `recruiting-ai-backend/config/master.key` exists, or set **`RAILS_MASTER_KEY`** in `.env`.
 
@@ -43,11 +51,14 @@ With the default Compose env, the browser uses **`VITE_API_URL=http://localhost:
 
 | Command | Purpose |
 |---------|---------|
+| `make start` | **Run** the stack in the background (`docker compose up -d --build`) |
+| `make stop` | **Stop** the stack (`docker compose down`; keeps volumes) |
+| `make restart` | `stop` then `start` |
+| `make up` | Run in the **foreground** with logs (Ctrl+C stops) |
+| `make logs` | Follow logs from all services |
 | `make console` | Open **Rails console** in the backend container |
 | `docker compose exec backend bin/rails console` | Same as `make console` |
 | `docker compose ps` | Show service status |
-| `docker compose logs -f backend` | Follow backend logs |
-| `docker compose down` | Stop containers |
 | `docker compose down -v` | Stop and **delete** Postgres volume (wipes DB) |
 
 ### Rails console
