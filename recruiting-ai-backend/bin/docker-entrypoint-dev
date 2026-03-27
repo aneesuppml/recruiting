@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -e
+
+export PATH="/rails/bin:${PATH}"
+
+host="${DATABASE_HOST:-db}"
+user="${POSTGRES_USER:-postgres}"
+port="${POSTGRES_PORT:-5432}"
+
+echo "Waiting for PostgreSQL at ${host}:${port}..."
+until pg_isready -h "$host" -p "$port" -U "$user" >/dev/null 2>&1; do
+  sleep 1
+done
+
+echo "Ensuring Bundler 2.5+..."
+gem install bundler -v '~> 2.5' --no-document
+
+if ! bundle check >/dev/null 2>&1; then
+  echo "Installing gems..."
+  bundle install
+fi
+
+echo "Preparing database..."
+bundle exec rails db:prepare
+bundle exec rails db:seed
+
+exec "$@"

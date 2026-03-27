@@ -6,6 +6,10 @@ SEED_PASSWORD = "password123"
 
 # Clear existing data in development/test only (order matters for foreign keys)
 if Rails.env.development? || Rails.env.test?
+  # Break circular FK: companies.admin_user_id <-> users.company_id
+  Company.update_all(admin_user_id: nil) if Company.column_names.include?("admin_user_id")
+  User.update_all(company_id: nil) if User.column_names.include?("company_id")
+
   [Feedback, Interview, Application, Candidate, Job, Membership, User, Role, Company].each do |model|
     model.delete_all
   end
