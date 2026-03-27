@@ -10,6 +10,8 @@ Build a React Admin UI for the recruiting-ai platform.
 - Backend: `recruiting-ai-backend`
 - Frontend: `recruiting-ai-frontend`
 
+**Docker (optional):** From the **parent folder** that contains **`docker-compose.yml`**, run `docker compose up --build` (see **Docker Compose** below). The UI in the browser stays at **`http://localhost:5173`**; the API is reachable at **`http://localhost:3000`** or via the Vite **`/api`** proxy when using the Compose frontend service.
+
 The backend is a Rails 7 API with the following modules:
 
 - Authentication (JWT) — recruiters
@@ -24,6 +26,16 @@ The backend is a Rails 7 API with the following modules:
 - Dashboard & Analytics
 
 The UI should consume these APIs and act as an internal recruiting dashboard similar to a modern ATS platform (Greenhouse, Lever, Ashby, or Kula AI).
+
+---
+
+## Docker Compose (development)
+
+- **Location:** Workspace root **`docker-compose.yml`** next to **`recruiting-ai-backend`** and **`recruiting-ai-frontend`** (Compose project **`recruiting-ai`**).
+- **Containers:** `recruiting-ai-db`, `recruiting-ai-backend`, `recruiting-ai-frontend`; **network** `recruiting-ai-network`; internal service names **`db`**, **`backend`**, **`frontend`** (Axios in the **browser** must not use `http://backend:3000` — use host **`localhost`** or the Vite proxy).
+- **Frontend service env:** `VITE_DOCKER=true`, `VITE_API_URL` default `http://localhost:5173/api`, `VITE_PROXY_TARGET=http://backend:3000`.
+- **`vite.config.js`:** Read **`VITE_DOCKER`** and **`VITE_PROXY_TARGET`** via **`import { env } from 'node:process'`** (avoids ESLint `process` undefined when the config is linted with browser globals). When `env.VITE_DOCKER === 'true'`, enable **`server.proxy['/api']`** → backend, with **`rewrite`** to remove the `/api` prefix so Rails routes stay **`/login`**, **`/jobs`**, etc.
+- **Root env:** Copy **`.env.example`** to **`.env`**; **`COMPOSE_PROJECT_NAME=recruiting-ai`**; optional **`POSTGRES_PORT` / `BACKEND_PORT` / `FRONTEND_PORT`** if ports clash.
 
 ---
 
@@ -89,7 +101,9 @@ Use a modern SaaS admin dashboard theme.
 
 Configure Axios with:
 
-- baseURL pointing to Rails API (e.g. `import.meta.env.VITE_API_URL` or `http://localhost:3000`)
+- **baseURL** from `import.meta.env.VITE_API_URL` with fallback **`http://localhost:3000`**.  
+  - **Local dev (no Docker):** set **`VITE_API_URL=http://localhost:3000`** (e.g. in `.env`).  
+  - **Docker Compose frontend:** set **`VITE_API_URL=http://localhost:5173/api`** so the browser uses same-origin requests; **Vite** proxies **`/api/*`** to **`http://backend:3000`** (strip `/api` prefix) when **`VITE_DOCKER=true`** — see **Docker Compose** below.
 - automatic JWT token injection (e.g. from `localStorage.getItem("token")`)
 - request interceptor for `Authorization: Bearer <token>`
 - response error handling: on 401, clear token and dispatch auth-change **only when the request was not to /login or /signup** (so failed login/signup does not clear token and 401 from login means “invalid credentials”, not session expired)
@@ -461,8 +475,17 @@ npm install
 npm run dev
 ```
 
+**Run with Docker** (API + DB + Vite from repo root):
+
+```bash
+cp .env.example .env   # optional
+docker compose up --build
+```
+
+Then open **`http://localhost:5173`** (frontend) and ensure the API is up on **`http://localhost:3000`** or via **`/api`** proxy as configured.
+
 Design the UI similar to a modern ATS recruiting dashboard used by recruiting teams.
 
 ---
 
-*Last updated: Super Admin module (routes, layout, companies/users/analytics pages, header profile dropdown + /super-admin/profile); RBAC UI (`RoleProtectedRoute` + `SuperAdminRoute`); multi-company switching (Navbar `CompanySwitcher`, `active_company_id`/`company_status`, and `X-Company-ID`); pending/rejected gating (`/pending-approval`, `PendingCompanyRoute`, and `GET /company/status` + `GET /companies`); candidate UI now uses `GET /candidate/jobs` and `GET /candidate/jobs/:id` for job listing/details when candidate is authenticated; blue/white/dark-grey theme.*
+*Last updated: Docker Compose + Vite `/api` proxy (`VITE_DOCKER`, `VITE_API_URL=http://localhost:5173/api`, `node:process` `env` in `vite.config.js`); Super Admin module; RBAC (`RoleProtectedRoute`, `SuperAdminRoute`); `CompanySwitcher` + `X-Company-ID`; pending gating; candidate `GET /candidate/jobs` / `GET /candidate/jobs/:id`; blue/white/dark-grey theme.*

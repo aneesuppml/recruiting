@@ -10,6 +10,8 @@ Create a new Rails API-only project for a recruiting platform.
 
 **Repo folder name (this workspace):** `recruiting-ai-backend` (backend) and `recruiting-ai-frontend` (frontend).
 
+**Docker (optional):** A root-level **`docker-compose.yml`** (project name **`recruiting-ai`**) runs PostgreSQL, the Rails API, and the Vite dev server together. Container names: **`recruiting-ai-db`**, **`recruiting-ai-backend`**, **`recruiting-ai-frontend`**; network **`recruiting-ai-network`**; service DNS names inside Compose remain **`db`**, **`backend`**, **`frontend`**. Copy **`.env.example`** to **`.env`** at the repo root and run `docker compose up --build`. See the Docker subsection under Architecture for env vars and DB behavior.
+
 **Target stack:**
 - Ruby 3.1.x
 - Rails 7.x
@@ -377,6 +379,29 @@ All `/super-admin/*` endpoints require the Super Admin role and are isolated fro
 
 ---
 
+## Docker Compose (development)
+
+The **workspace root** (parent of `recruiting-ai-backend` and `recruiting-ai-frontend`) contains **`docker-compose.yml`** with Compose project name **`recruiting-ai`** (`COMPOSE_PROJECT_NAME=recruiting-ai` in root `.env` matches).
+
+**Services:**
+- **`db`** — PostgreSQL 16 (`recruiting-ai-db`), healthcheck via `pg_isready`, port `${POSTGRES_PORT:-5432}:5432`.
+- **`backend`** — build context `./recruiting-ai-backend`, image tag **`recruiting-ai-backend:dev`**, **`container_name: recruiting-ai-backend`**, bind-mount for live reload, volume **`recruiting-ai-bundle-cache`** for gems. Puma listens on **`0.0.0.0:3000`**. **`depends_on`** DB with `service_healthy`.
+- **`frontend`** — build context `./recruiting-ai-frontend`, image **`recruiting-ai-frontend:dev`**, **`container_name: recruiting-ai-frontend`**, separate volume for **`node_modules`**.
+
+**Backend container environment (representative):** `RAILS_ENV=development`, `DOCKER=true` (allows `config.hosts` for the hostname `backend`), `DATABASE_HOST=db`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`, `SECRET_KEY_BASE` (JWT signing aligns with `Rails.application.secret_key_base` when set in development), `CORS_ORIGINS` (comma-separated; default includes `http://localhost:5173`).
+
+**Database config:** `config/database.yml` uses **`DATABASE_HOST`** and Postgres credentials when `DATABASE_HOST` is present (Docker); without it, local socket/default OS user behavior is unchanged for non-Docker development.
+
+**Backend image:** `recruiting-ai-backend/Dockerfile` (Ruby 3.1, Bundler 2.5+, `bundle install`). **`bin/docker-entrypoint-dev`** waits for Postgres, ensures Bundler, runs **`rails db:prepare`** and **`rails db:seed`**, then **`rails server -b 0.0.0.0 -p 3000`**. Production-style build is kept as **`Dockerfile.production`**.
+
+**Seeds:** `db/seeds.rb` clears dev/test data in an order that avoids circular FK violations between **`companies.admin_user_id`** and **`users.company_id`** (nullify those columns before `delete_all`).
+
+**Named volumes (examples):** `recruiting-ai-postgres-data`, `recruiting-ai-bundle-cache`, `recruiting-ai-frontend-node-modules`.
+
+**Port conflicts:** Override in root `.env`, e.g. `POSTGRES_PORT`, `BACKEND_PORT`, `FRONTEND_PORT`.
+
+---
+
 ## After Generating All Files
 
 The project should be ready for:
@@ -386,6 +411,13 @@ cd recruiting-ai-backend
 bundle install
 rails db:create
 rails db:migrate
+```
+
+**Or with Docker** (from the **parent** directory that contains `docker-compose.yml`):
+
+```bash
+cp .env.example .env   # optional
+docker compose up --build
 ```
 
 ---
@@ -442,4 +474,4 @@ Generate seed data that populates realistic sample data for all models.
 
 ---
 
-*Last updated: RBAC across backend via `Authorizable` (Admin/Recruiter/Hiring Manager/Interviewer), roles included in auth/profile JSON; multi-company ownership via `admin_user_id`; active tenant context via `X-Company-ID` + `active_company_id`/`company_status`; pending restrictions allow `/profile`, `/company/status`, and `GET /companies`; candidate job scoping via `GET /candidate/jobs` and `GET /candidate/jobs/:id` in addition to candidate applications.*
+*Last updated: Docker Compose at workspace root (`name: recruiting-ai`, containers `recruiting-ai-*`, network/volumes `recruiting-ai-*`); backend `DATABASE_HOST`/Postgres env, `CORS_ORIGINS`, `SECRET_KEY_BASE`, `bin/docker-entrypoint-dev`, `Dockerfile` + `Dockerfile.production`; seeds FK-safe clear for `admin_user_id`/`company_id`. RBAC via `Authorizable`; `X-Company-ID` + `active_company_id`/`company_status`; pending restrictions; candidate jobs `GET /candidate/jobs` and `GET /candidate/jobs/:id`.*
