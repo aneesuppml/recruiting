@@ -10,7 +10,7 @@ Build a React Admin UI for the recruiting-ai platform.
 - Backend: `recruiting-ai-backend`
 - Frontend: `recruiting-ai-frontend`
 
-**Docker (optional):** From the **parent folder** that contains **`docker-compose.yml`**, run `docker compose up --build` (see **Docker Compose** below). The UI in the browser stays at **`http://localhost:5173`**; the API is reachable at **`http://localhost:3000`** or via the Vite **`/api`** proxy when using the Compose frontend service.
+**Docker (optional):** From the **parent folder** that contains **`docker-compose.yml`**, run `docker compose up --build` (see **Docker Compose** below). The UI in the browser stays at **`http://localhost:5173`**; the API is reachable at **`http://localhost:3000`** or via the Vite **`/api`** proxy when using the Compose frontend service. Root **`README.md`** documents the full stack, env vars, **`make console`** (Rails console for the backend), and common Compose commands. **`recruiting-ai-frontend/docker-compose.yml`** includes the root stack with **`name: recruiting-ai`** so Compose from this folder keeps the project name **`recruiting-ai`**.
 
 The backend is a Rails 7 API with the following modules:
 
@@ -32,10 +32,12 @@ The UI should consume these APIs and act as an internal recruiting dashboard sim
 ## Docker Compose (development)
 
 - **Location:** Workspace root **`docker-compose.yml`** next to **`recruiting-ai-backend`** and **`recruiting-ai-frontend`** (Compose project **`recruiting-ai`**).
+- **Wrapper compose:** **`recruiting-ai-backend/docker-compose.yml`** and **`recruiting-ai-frontend/docker-compose.yml`** each set **`name: recruiting-ai`** and **`include`** the root file so `docker compose` from an app subfolder does not use the folder name as the project name.
 - **Containers:** `recruiting-ai-db`, `recruiting-ai-backend`, `recruiting-ai-frontend`; **network** `recruiting-ai-network`; internal service names **`db`**, **`backend`**, **`frontend`** (Axios in the **browser** must not use `http://backend:3000` — use host **`localhost`** or the Vite proxy).
 - **Frontend service env:** `VITE_DOCKER=true`, `VITE_API_URL` default `http://localhost:5173/api`, `VITE_PROXY_TARGET=http://backend:3000`.
 - **`vite.config.js`:** Read **`VITE_DOCKER`** and **`VITE_PROXY_TARGET`** via **`import { env } from 'node:process'`** (avoids ESLint `process` undefined when the config is linted with browser globals). When `env.VITE_DOCKER === 'true'`, enable **`server.proxy['/api']`** → backend, with **`rewrite`** to remove the `/api` prefix so Rails routes stay **`/login`**, **`/jobs`**, etc.
 - **Root env:** Copy **`.env.example`** to **`.env`**; **`COMPOSE_PROJECT_NAME=recruiting-ai`**; optional **`POSTGRES_PORT` / `BACKEND_PORT` / `FRONTEND_PORT`** if ports clash.
+- **Docs / tooling:** Root **`README.md`** (quick start, URLs, env, ports, **`make console`** for Rails); root **`Makefile`** targets backend console.
 
 ---
 
@@ -482,10 +484,10 @@ cp .env.example .env   # optional
 docker compose up --build
 ```
 
-Then open **`http://localhost:5173`** (frontend) and ensure the API is up on **`http://localhost:3000`** or via **`/api`** proxy as configured.
+Then open **`http://localhost:5173`** (frontend) and ensure the API is up on **`http://localhost:3000`** or via **`/api`** proxy as configured. See root **`README.md`** for **`make console`**, logs, and troubleshooting.
 
 Design the UI similar to a modern ATS recruiting dashboard used by recruiting teams.
 
 ---
 
-*Last updated: Docker Compose + Vite `/api` proxy (`VITE_DOCKER`, `VITE_API_URL=http://localhost:5173/api`, `node:process` `env` in `vite.config.js`); Super Admin module; RBAC (`RoleProtectedRoute`, `SuperAdminRoute`); `CompanySwitcher` + `X-Company-ID`; pending gating; candidate `GET /candidate/jobs` / `GET /candidate/jobs/:id`; blue/white/dark-grey theme.*
+*Last updated: Root `README.md` + `Makefile`; wrapper compose `name: recruiting-ai` + `include`; Docker + Vite `/api` proxy (`VITE_DOCKER`, `VITE_API_URL=http://localhost:5173/api`, `node:process` `env` in `vite.config.js`); Super Admin module; RBAC (`RoleProtectedRoute`, `SuperAdminRoute`); `CompanySwitcher` + `X-Company-ID`; pending gating; candidate `GET /candidate/jobs` / `GET /candidate/jobs/:id`; blue/white/dark-grey theme.*

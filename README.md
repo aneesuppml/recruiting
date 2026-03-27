@@ -1,63 +1,86 @@
 # Recruiting AI
 
-A full-stack **Applicant Tracking System (ATS)**–style recruiting platform: recruiters manage companies, jobs, candidates, and pipelines; external candidates can browse jobs and apply using a separate auth flow. This repository holds the **API**, the **web app**, shared **AI prompts / specs**, and **Docker** orchestration.
-
-## What’s in this repo
+Full-stack **Applicant Tracking System (ATS)**–style platform: recruiters manage companies, jobs, candidates, and pipelines; job seekers use a separate candidate auth flow and public job board.
 
 | Area | Folder | Stack |
 |------|--------|--------|
-| Backend API | `recruiting-ai-backend` | Ruby 3.1, Rails 7 API, PostgreSQL, JWT |
-| Web UI | `recruiting-ai-frontend` | React, Vite, Tailwind, React Router |
-| Product specs | `ai-prompts` | Backend and UI specification markdown |
-| Containers | `docker-compose.yml` (root) | Postgres + Rails + Vite dev servers |
+| API | `recruiting-ai-backend` | Ruby 3.1, Rails 7 API-only, PostgreSQL, JWT |
+| Web app | `recruiting-ai-frontend` | React, Vite, Tailwind, React Router |
+| Specs | `ai-prompts` | Backend & UI specification markdown |
 
-Detailed API and UI behavior are described in `ai-prompts/RECRUITING_AI_BACKEND_SPEC.md` and `ai-prompts/RECRUITING_AI_UI_SPEC.md`. Each app folder may also have its own README.
+Product behavior is documented in `ai-prompts/RECRUITING_AI_BACKEND_SPEC.md` and `ai-prompts/RECRUITING_AI_UI_SPEC.md`.
 
 ---
 
-## Run with Docker
+## Run with Docker (recommended)
 
-Docker Compose starts **PostgreSQL**, the **Rails** API, and the **Vite** dev server with live-reload volumes. Compose project name: **`recruiting-ai`**.
+**Compose project name:** `recruiting-ai` (declared in the root `docker-compose.yml` and in the small `docker-compose.yml` files under `recruiting-ai-backend/` and `recruiting-ai-frontend/` so the name stays `recruiting-ai` when you run Compose from those subfolders).
 
-### Prerequisites
+**Requirements:** Docker + Compose v2; host ports **5432**, **3000**, and **5173** free (or override in `.env`).
 
-- [Docker](https://docs.docker.com/get-docker/) and Docker Compose v2  
-- Ports **5432**, **3000**, and **5173** available on the host (or override them—see below)
+### Start the stack
 
-### Quick start
-
-From **this directory** (the folder that contains `docker-compose.yml`):
+From the **repository root** (next to `docker-compose.yml`):
 
 ```bash
-cp .env.example .env
+cp .env.example .env    # optional; defaults work for local dev
 docker compose up --build
 ```
 
-The first backend boot runs migrations and seeds (development data). Rails needs a valid **`config/master.key`** in `recruiting-ai-backend` (or set **`RAILS_MASTER_KEY`** in `.env`) if your encrypted credentials require it.
+First boot runs migrations and seeds. Ensure `recruiting-ai-backend/config/master.key` exists, or set **`RAILS_MASTER_KEY`** in `.env`.
 
 ### URLs
 
-| Service | URL |
-|---------|-----|
-| Frontend (Vite) | [http://localhost:5173](http://localhost:5173) |
-| Backend API | [http://localhost:3000](http://localhost:3000) |
-| Health check | [http://localhost:3000/up](http://localhost:3000/up) |
+| What | URL |
+|------|-----|
+| Frontend (Vite) | http://localhost:5173 |
+| Rails API | http://localhost:3000 |
+| Health | http://localhost:3000/up |
 
-With the default Docker setup, the browser talks to the API either at **port 3000** or through the Vite **`/api`** proxy (see `VITE_API_URL` in `.env.example`).
+With the default Compose env, the browser uses **`VITE_API_URL=http://localhost:5173/api`** and Vite proxies **`/api`** to the backend (see `.env.example`).
 
-### Environment
+### Common commands (run from repo root)
 
-Copy **`.env.example`** to **`.env`** and adjust as needed. Notable variables:
+| Command | Purpose |
+|---------|---------|
+| `make console` | Open **Rails console** in the backend container |
+| `docker compose exec backend bin/rails console` | Same as `make console` |
+| `docker compose ps` | Show service status |
+| `docker compose logs -f backend` | Follow backend logs |
+| `docker compose down` | Stop containers |
+| `docker compose down -v` | Stop and **delete** Postgres volume (wipes DB) |
 
-- **`COMPOSE_PROJECT_NAME`** — matches the Compose project (`recruiting-ai`)
-- **`SECRET_KEY_BASE`** — long random string for Rails/JWT in development
-- **`POSTGRES_*`** — database user, password, and database name
-- **`VITE_API_URL`** — frontend API base URL (Docker default uses the Vite `/api` proxy)
-- **`CORS_ORIGINS`** — allowed browser origins for direct API calls
+### Rails console
+
+Use the **Makefile** or Compose (not raw `docker exec` unless you know the container is on `recruiting-ai-network`):
+
+```bash
+make console
+```
+
+Equivalent:
+
+```bash
+docker compose exec backend bin/rails console
+```
+
+Works from the **repo root** or from **`recruiting-ai-backend/`** (include compose file).
+
+The app connects to Postgres at host **`db`** (Compose service name). If you see **`could not translate host name "db"`**, recreate the stack from the repo root: `docker compose down && docker compose up -d`, then check: `docker compose exec backend getent hosts db`.
+
+### Environment (`.env`)
+
+| Variable | Role |
+|----------|------|
+| `COMPOSE_PROJECT_NAME` | Should match `recruiting-ai` |
+| `SECRET_KEY_BASE` | Rails / JWT signing in dev (long random string) |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` | Database credentials |
+| `VITE_API_URL` | Frontend API base (Docker default: `http://localhost:5173/api`) |
+| `CORS_ORIGINS` | Origins allowed for direct browser → API calls |
 
 ### Port conflicts
 
-If something already uses **5432**, **3000**, or **5173**, set alternate host ports in `.env`:
+If **5432**, **3000**, or **5173** are taken, set in `.env` for example:
 
 ```env
 POSTGRES_PORT=5433
@@ -65,20 +88,12 @@ BACKEND_PORT=3001
 FRONTEND_PORT=5174
 ```
 
-### Stop and remove containers
-
-```bash
-docker compose down
-```
-
-To also remove named volumes (this deletes the Postgres data volume):
-
-```bash
-docker compose down -v
-```
-
 ---
 
 ## Run without Docker
 
-Use two terminals: one for `recruiting-ai-backend` (`bundle install`, `rails db:prepare`, `rails s`) and one for `recruiting-ai-frontend` (`npm install`, `npm run dev`), with a local PostgreSQL instance and `VITE_API_URL=http://localhost:3000`. See the READMEs inside each app folder for more detail.
+- **Backend:** `cd recruiting-ai-backend` → `bundle install`, `rails db:prepare`, `rails s` (needs local PostgreSQL; set `DATABASE_HOST` / credentials in `config/database.yml` or env as needed).
+- **Frontend:** `cd recruiting-ai-frontend` → `npm install`, `npm run dev` with **`VITE_API_URL=http://localhost:3000`**.
+- **Rails console:** `cd recruiting-ai-backend` → `bin/rails console` (or `bin/rails c`).
+
+See READMEs inside each app folder for more detail.

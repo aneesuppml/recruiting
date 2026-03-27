@@ -1,0 +1,5 @@
+# Allows `docker compose` from this folder; project name stays `recruiting-ai` (not `recruiting-ai-frontend`).
+name: recruiting-ai
+
+include:
+  - path: ../docker-compose.yml

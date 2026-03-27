@@ -1,0 +1,6 @@
+# Allows `docker compose` commands from this folder (includes the root stack).
+# `name` is required here so the project name stays `recruiting-ai` (not the folder name `recruiting-ai-backend`).
+name: recruiting-ai
+
+include:
+  - path: ../docker-compose.yml
